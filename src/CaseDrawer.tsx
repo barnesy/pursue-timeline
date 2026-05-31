@@ -14,7 +14,9 @@ import Tooltip from "@mui/material/Tooltip";
 import type { Case } from "./types";
 import { AGENCY_COLORS, AGENCY_SHORT, TYPE_COLORS, TYPE_LABELS } from "./theme";
 import { DATASETS } from "./datasets";
-import { findNearby, formatDaysDelta, formatKm } from "./proximity";
+import { findNearby, formatDaysDelta } from "./proximity";
+import { fmtDistance, type UnitSystem } from "./blastPhysics";
+import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { AddToCasesButton } from "./AddToCasesButton";
@@ -37,6 +39,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
     () => findNearby(kase, allCases, { maxKm: 500, maxYears: 5, limit: 10 }),
     [kase, allCases],
   );
+  const units = useUnits();
   return (
     <Box
       sx={{
@@ -144,7 +147,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
             />
           )}
           {typeof kase.altitudeM === "number" && (
-            <MetaRow label="Altitude" value={fmtAltitude(kase.altitudeM)} />
+            <MetaRow label="Altitude" value={fmtAltitude(kase.altitudeM, units)} />
           )}
 
           {(kase.dataset === "nuclear-test" || kase.dataset === "nuclear-incident") && (
@@ -183,7 +186,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
                     color="text.secondary"
                     sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
                   >
-                    Cross-dataset · within 500 km · ± 5 years
+                    Cross-dataset · within {fmtDistance(500_000, units)} · ± 5 years
                   </Typography>
                 </Stack>
                 <Stack spacing={0.5}>
@@ -227,7 +230,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
                               {n.case.incidentDateRaw || "—"} ·{" "}
                               {AGENCY_SHORT[n.case.agency] || n.case.agency} ·{" "}
                               <span style={{ color: "#cfe3ff" }}>
-                                {formatKm(n.km)}
+                                {fmtDistance(n.km * 1000, units)}
                               </span>
                               {" · "}
                               {formatDaysDelta(n.daysDelta)}
@@ -331,16 +334,10 @@ function fmtYield(kt: number): string {
   return `${kt < 1 ? kt.toFixed(2) : kt.toString()} kt`;
 }
 
-function fmtAltitude(m: number): string {
-  if (m === 0) return "0 m · surface";
-  if (m > 0) {
-    if (m >= 1000) return `+${(m / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km above ground`;
-    return `+${m.toLocaleString()} m above ground`;
-  }
-  // Underground
-  const depth = -m;
-  if (depth >= 1000) return `−${(depth / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km underground`;
-  return `−${depth.toLocaleString()} m underground`;
+function fmtAltitude(m: number, units: UnitSystem): string {
+  if (m === 0) return units === "imperial" ? "0 ft · surface" : "0 m · surface";
+  const dist = fmtDistance(Math.abs(m), units);
+  return m > 0 ? `+${dist} above ground` : `−${dist} underground`;
 }
 
 function MetaRow({ label, value }: { label: string; value: string }) {

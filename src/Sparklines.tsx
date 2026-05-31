@@ -15,6 +15,8 @@
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import { fmtDistance, type UnitSystem } from "./blastPhysics";
+import { useUnits } from "./units";
 
 // ---- Yield ---------------------------------------------------------------
 
@@ -154,15 +156,10 @@ function altitudeBandIndex(m: number, typeStr: string): number {
   return 0;
 }
 
-function fmtAltitudeShort(m: number): string {
+function fmtAltitudeShort(m: number, units: UnitSystem): string {
   if (m === 0) return "surface";
-  if (m > 0) {
-    if (m >= 1000) return `+${(m / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km`;
-    return `+${m.toLocaleString()} m`;
-  }
-  const d = -m;
-  if (d >= 1000) return `−${(d / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km`;
-  return `−${d.toLocaleString()} m`;
+  const d = fmtDistance(Math.abs(m), units);
+  return m > 0 ? `+${d}` : `−${d}`;
 }
 
 export function AltitudeSparkline({
@@ -172,13 +169,14 @@ export function AltitudeSparkline({
   altM: number | undefined;
   typeStr: string;
 }) {
+  const units = useUnits();
   const W = 60;
   const H = 8;
   const idx = altitudeBandIndex(altM ?? 0, typeStr);
   const segW = W / BANDS.length;
   const fullLabel =
     typeof altM === "number"
-      ? `${BANDS[idx].label} · ${fmtAltitudeShort(altM)}`
+      ? `${BANDS[idx].label} · ${fmtAltitudeShort(altM, units)}`
       : BANDS[idx].label;
   return (
     <Tooltip title={`Altitude: ${fullLabel}`} placement="top">
@@ -217,7 +215,7 @@ export function AltitudeSparkline({
             minWidth: 56,
           }}
         >
-          {typeof altM === "number" ? fmtAltitudeShort(altM) : BANDS[idx].label.toLowerCase()}
+          {typeof altM === "number" ? fmtAltitudeShort(altM, units) : BANDS[idx].label.toLowerCase()}
         </Typography>
       </Box>
     </Tooltip>

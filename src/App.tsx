@@ -41,6 +41,7 @@ import { CasePanel } from "./CaseDrawer";
 import { HotspotsPanel } from "./HotspotsPanel";
 import { CasesOverlay } from "./CasesOverlay";
 import { useCaseIds } from "./collection";
+import { useUnits, unitsStore } from "./units";
 import {
   DATASETS,
   DATASET_IDS,
@@ -266,6 +267,7 @@ const DATASET_SOURCES: DatasetSource[] = [
 export function App() {
   const [cases, setCases] = useState<Case[] | null>(null);
   const caseIds = useCaseIds();
+  const units = useUnits();
   const [casesOpen, setCasesOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
@@ -890,6 +892,25 @@ export function App() {
               <PublicIcon fontSize="small" sx={{ mr: { xs: 0, md: 0.75 } }} />
               <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>Map</Box>
             </ToggleButton>
+          </ToggleButtonGroup>
+          {/* App-wide units of measure — drives every distance in the app */}
+          <ToggleButtonGroup
+            size="small"
+            value={units}
+            exclusive
+            onChange={(_, v) => v && unitsStore.set(v)}
+            aria-label="Units of measure"
+            sx={{
+              "& .MuiToggleButton-root": {
+                px: { xs: 0.6, md: 0.9 },
+                py: 0.5,
+                textTransform: "none",
+                minWidth: 32,
+              },
+            }}
+          >
+            <ToggleButton value="metric" aria-label="Metric units (m / km)">m</ToggleButton>
+            <ToggleButton value="imperial" aria-label="Imperial units (ft / mi)">ft</ToggleButton>
           </ToggleButtonGroup>
           <Badge
             badgeContent={caseIds.length}

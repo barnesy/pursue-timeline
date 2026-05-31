@@ -22,7 +22,9 @@ import { scaleTime } from "d3-scale";
 import type { Case } from "./types";
 import { AGENCY_COLORS, AGENCY_SHORT } from "./theme";
 import { DATASETS } from "./datasets";
-import { getLatLng, haversineKm, formatKm, formatDaysDelta } from "./proximity";
+import { getLatLng, haversineKm, formatDaysDelta } from "./proximity";
+import { fmtDistance } from "./blastPhysics";
+import { useUnits } from "./units";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { casesStore, useCaseIds } from "./collection";
 
@@ -41,6 +43,7 @@ type Link = { a: Pt; b: Pt; km: number; days: number; score: number };
 
 export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
   const ids = useCaseIds();
+  const units = useUnits();
   const [maxKm, setMaxKm] = useState(500);
   const [maxYears, setMaxYears] = useState(5);
 
@@ -89,7 +92,7 @@ export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
           {span} · <b style={{ color: "#ffb454" }}>{links.length}</b> correlation{links.length === 1 ? "" : "s"}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <Slider2 label="distance ≤" value={maxKm} min={25} max={2000} step={25} unit="km" onChange={setMaxKm} />
+        <Slider2 label="distance ≤" value={maxKm} min={25} max={2000} step={25} unit="km" displayValue={fmtDistance(maxKm * 1000, units)} onChange={setMaxKm} />
         <Slider2 label="time ≤" value={maxYears} min={1} max={20} step={1} unit="yr" onChange={setMaxYears} />
         <Button size="small" startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />} onClick={() => casesStore.clear()} sx={{ textTransform: "none", color: "text.secondary" }}>Clear</Button>
         <IconButton size="small" onClick={onClose} aria-label="Close"><CloseIcon fontSize="small" /></IconButton>
@@ -143,6 +146,7 @@ function Label({ children, sx }: { children: React.ReactNode; sx?: object }) {
 
 function CaseCard({ pt, links, onOpen }: { pt: Pt; links: Link[]; onOpen: (c: Case) => void }) {
   const c = pt.c;
+  const units = useUnits();
   const color = dotColor(c);
   const meta = [c.incidentDateRaw || "undated", AGENCY_SHORT[c.agency] || c.agency, c.incidentLocation].filter(Boolean).join(" · ");
   const showSparks = typeof c.yieldKt === "number" || (c.dataset === "nuclear-test" && !!(c.subtype || c.type));
@@ -196,7 +200,7 @@ function CaseCard({ pt, links, onOpen }: { pt: Pt; links: Link[]; onOpen: (c: Ca
             {myLinks.map((l, k) => (
               <Box key={k} sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, border: "1px solid rgba(255,180,84,0.4)", borderRadius: 1, px: 0.75, py: 0.25 }}>
                 <Box sx={{ width: 14, height: 14, borderRadius: "50%", bgcolor: dotColor(l.other.c), color: "#0a0d12", fontSize: 8.5, fontWeight: 800, fontFamily: "JetBrains Mono, monospace", display: "grid", placeItems: "center" }}>{l.other.i}</Box>
-                <Typography sx={{ fontSize: 10, color: "#ffb454", fontFamily: "JetBrains Mono, monospace" }}>{formatKm(l.km)} / {formatDaysDelta(Math.round(l.days))}</Typography>
+                <Typography sx={{ fontSize: 10, color: "#ffb454", fontFamily: "JetBrains Mono, monospace" }}>{fmtDistance(l.km * 1000, units)} / {formatDaysDelta(Math.round(l.days))}</Typography>
               </Box>
             ))}
           </Box>
@@ -218,11 +222,11 @@ function CaseCard({ pt, links, onOpen }: { pt: Pt; links: Link[]; onOpen: (c: Ca
 
 // --- header slider -----------------------------------------------------------
 
-function Slider2({ label, value, min, max, step, unit, onChange }: { label: string; value: number; min: number; max: number; step: number; unit: string; onChange: (v: number) => void }) {
+function Slider2({ label, value, min, max, step, unit, displayValue, onChange }: { label: string; value: number; min: number; max: number; step: number; unit: string; displayValue?: string; onChange: (v: number) => void }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 150 }}>
       <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontFamily: "JetBrains Mono, monospace" }}>
-        {label} <b style={{ color: "#e6ecf2" }}>{value} {unit}</b>
+        {label} <b style={{ color: "#e6ecf2" }}>{displayValue ?? `${value} ${unit}`}</b>
       </Typography>
       <Slider size="small" value={value} min={min} max={max} step={step} onChange={(_, v) => onChange(v as number)} sx={{ width: 70 }} />
     </Box>

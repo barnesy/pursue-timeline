@@ -35,6 +35,7 @@ import {
   type UnitSystem,
 } from "./blastPhysics";
 import { useAnimationFrame, prefersReducedMotion } from "./useAnimationFrame";
+import { useUnits } from "./units";
 import { LocationMap, type BlastRing } from "./LocationMap";
 // Lazy-loaded: pulls maplibre-gl (the heaviest dependency) into its own chunk
 // so it only downloads when the user actually opens the 3D map.
@@ -646,17 +647,10 @@ export function BlastDiagram({ kase }: Props) {
     ro.observe(tiltStageRef.current);
     return () => ro.disconnect();
   }, []);
-  // Unit system — toggles label formatting between metric (m/km) and
-  // imperial (ft/mi). Persisted to localStorage so the user's choice
-  // sticks across cases.
-  const [units, setUnits] = useState<UnitSystem>(() => {
-    if (typeof window === "undefined") return "metric";
-    return (localStorage.getItem("blast-units") as UnitSystem) || "metric";
-  });
-  const setUnitsPersist = useCallback((u: UnitSystem) => {
-    setUnits(u);
-    try { localStorage.setItem("blast-units", u); } catch { /* ignore quota */ }
-  }, []);
+  // Unit system is global now — driven by the navbar toggle via the shared
+  // units store. Reading it here keeps the blast viz in sync with the rest of
+  // the app (m/km ↔ ft/mi) without a per-diagram control.
+  const units = useUnits();
 
   const requestLocation = useCallback(() => {
     if (!("geolocation" in navigator)) {
@@ -764,7 +758,6 @@ export function BlastDiagram({ kase }: Props) {
       title={yieldDisplay}
       subtitle={comparison ? compareLabel(comparison) : ""}
       env={env}
-      headerExtra={<UnitsToggle units={units} onChange={setUnitsPersist} />}
     >
       {/* PRIMARY ANIMATION — tilted axonometric view. A single panel
           replaces the previous dual side-view layout. A scenario toggle
@@ -1181,7 +1174,7 @@ export function BlastDiagram({ kase }: Props) {
                     />
                   );
                 })}
-              <ScaleBar scale={scale} cx={SVG_W / 2} y={RING_H - 10} maxRadiusM={maxRadiusM} />
+              <ScaleBar scale={scale} cx={SVG_W / 2} y={RING_H - 10} maxRadiusM={maxRadiusM} units={units} />
             </svg>
           )}
         </Box>
@@ -1207,7 +1200,7 @@ export function BlastDiagram({ kase }: Props) {
                 />
               );
             })}
-          <ScaleBar scale={scale} cx={SVG_W / 2} y={RING_H / 2 + 8 + ringMaxPx + 14} maxRadiusM={maxRadiusM} />
+          <ScaleBar scale={scale} cx={SVG_W / 2} y={RING_H / 2 + 8 + ringMaxPx + 14} maxRadiusM={maxRadiusM} units={units} />
         </svg>
       )}
 
@@ -1716,30 +1709,6 @@ function DiagramCard({
       </Box>
       {children}
     </Box>
-  );
-}
-
-function UnitsToggle({ units, onChange }: { units: UnitSystem; onChange: (u: UnitSystem) => void }) {
-  return (
-    <ToggleButtonGroup
-      size="small"
-      value={units}
-      exclusive
-      onChange={(_, v) => v && onChange(v)}
-      sx={{
-        "& .MuiToggleButton-root": {
-          px: 0.85,
-          py: 0.1,
-          fontSize: 10,
-          textTransform: "none",
-          minWidth: 28,
-          lineHeight: 1.2,
-        },
-      }}
-    >
-      <ToggleButton value="metric" aria-label="Metric units">m</ToggleButton>
-      <ToggleButton value="imperial" aria-label="Imperial units">ft</ToggleButton>
-    </ToggleButtonGroup>
   );
 }
 
@@ -3216,30 +3185,24 @@ function ScaleBar({
   cx,
   y,
   maxRadiusM,
+  units,
 }: {
   scale: number;
   cx: number;
   y: number;
   maxRadiusM: number;
+  units: UnitSystem;
 }) {
-  // Pick a round-number reference length whose pixel width is between 30 and 120
-  const candidates = [
-    { m: 100, label: "100 m" },
-    { m: 500, label: "500 m" },
-    { m: 1000, label: "1 km" },
-    { m: 5000, label: "5 km" },
-    { m: 10_000, label: "10 km" },
-    { m: 50_000, label: "50 km" },
-    { m: 100_000, label: "100 km" },
-    { m: 500_000, label: "500 km" },
-  ];
+  // Pick a round-number reference length (in meters) whose pixel width is
+  // between 30 and 120; the label renders in the active unit system.
+  const candidates = [100, 500, 1000, 5000, 10_000, 50_000, 100_000, 500_000];
   let chosen = candidates[0];
   for (const c of candidates) {
-    const px = c.m * scale;
+    const px = c * scale;
     if (px >= 30 && px <= 120) { chosen = c; break; }
-    if (c.m < maxRadiusM) chosen = c;
+    if (c < maxRadiusM) chosen = c;
   }
-  const px = chosen.m * scale;
+  const px = chosen * scale;
   const x0 = cx - px / 2;
   const x1 = cx + px / 2;
   return (
@@ -3255,7 +3218,7 @@ function ScaleBar({
         fontSize={10}
         fontFamily="JetBrains Mono, monospace"
       >
-        {chosen.label}
+        {fmtMeter(chosen, units)}
       </text>
     </g>
   );
