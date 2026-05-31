@@ -82,6 +82,27 @@ export const theme = createTheme({
   },
   shape: { borderRadius: 8 },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        // Dark, theme-matching scrollbars. Firefox uses scrollbar-color/width;
+        // WebKit/Chromium use the ::-webkit-scrollbar pseudo-elements. The thumb
+        // is a muted slate that sits quietly against the #0a0d12/#11161e surfaces.
+        "*": {
+          scrollbarWidth: "thin",
+          scrollbarColor: "#2a3340 transparent",
+        },
+        "*::-webkit-scrollbar": { width: 10, height: 10 },
+        "*::-webkit-scrollbar-track": { background: "transparent" },
+        "*::-webkit-scrollbar-thumb": {
+          backgroundColor: "#2a3340",
+          borderRadius: 8,
+          border: "2px solid transparent",
+          backgroundClip: "padding-box",
+        },
+        "*::-webkit-scrollbar-thumb:hover": { backgroundColor: "#3a4757" },
+        "*::-webkit-scrollbar-corner": { background: "transparent" },
+      },
+    },
     MuiAppBar: {
       defaultProps: { elevation: 0 },
       styleOverrides: {

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wireframes · Collections & Correlations</title>
+<style>
+  :root{
+    --bg:#0a0d12; --panel:#11161e; --panel2:#161c26; --line:rgba(255,255,255,0.10);
+    --txt:#e6ecf2; --mut:#a3aebd; --dim:#6b7685; --accent:#7ab8ff;
+    --uap:#7ab8ff; --uapcat:#34d399; --ntest:#ffd166; --ninc:#ef476f; --phys:#a78bfa; --star:#9aa5b1;
+    --note:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 Inter,system-ui,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 80px}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:38px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 8px}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+  .frame{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:12px;color:var(--mut);background:rgba(255,255,255,.02)}
+  .chip b{color:var(--txt)}
+  .ph{border:1px dashed rgba(255,255,255,.18);border-radius:6px;color:var(--dim);display:flex;align-items:center;justify-content:center;text-align:center}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:7px;padding:6px 12px;font-size:13px;color:var(--txt);background:rgba(255,255,255,.03)}
+  .btn.pri{background:rgba(122,184,255,.16);border-color:rgba(122,184,255,.5);color:#cfe3ff}
+  .row{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .meta{font-size:10px;color:var(--mut)}
+  .ttl{font-size:13px;font-weight:600}
+  .spark{height:6px;border-radius:3px;background:linear-gradient(90deg,#3a4250,#7a8595);width:70px;display:inline-block;vertical-align:middle}
+  .note{color:var(--note);font-size:12px;font-family:"JetBrains Mono",monospace}
+  .callout{border-left:2px solid var(--note);padding:2px 0 2px 10px;margin:6px 0;color:var(--note);font-size:12px;font-family:"JetBrains Mono",monospace}
+  .grid{display:grid;gap:16px}
+  .two{grid-template-columns:1fr 1fr}
+  .lead{color:var(--mut);max-width:760px}
+  .tag{display:inline-flex;align-items:center;gap:5px;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600}
+  .flowstep{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel)}
+  .flowstep .n{color:var(--accent);font-weight:700;font-family:"JetBrains Mono",monospace;font-size:11px}
+  small{color:var(--dim)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 0;font-size:12px;color:var(--mut)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Collections &amp; Correlations <span class="note">— wireframe v1</span></h1>
+  <p class="lead">Grab cases from anywhere into a <b>Collection</b>, tag them, then open <b>Correlate</b> to see how they relate in time, space, and across datasets — powered by the existing proximity engine (<span class="mono">findNearby · km + years</span>).</p>
+
+  <!-- FLOW -->
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <div class="flowstep"><div class="n">1 · GRAB</div>Add a case from the map, timeline, detail drawer, or search — one click, or multi-select.</div>
+    <div class="flowstep"><div class="n">2 · TAG</div>Label cases (“1947 wave”, “Nevada corridor”) to group within a collection.</div>
+    <div class="flowstep"><div class="n">3 · COLLECT</div>A tray holds your working set. Save / name / reopen collections.</div>
+    <div class="flowstep"><div class="n">4 · CORRELATE</div>Analyze the set: proximity network, matrix, mini-map links, timeline, findings.</div>
+  </div>
+
+  <!-- ============ FRAME 1: CAPTURE ============ -->
+  <h2>① Capturing cases — affordances everywhere</h2>
+  <p class="sub">The same "add" action shows up in every surface so you can grab a case wherever you find it.</p>
+  <div class="grid two">
+
+    <!-- Detail drawer add -->
+    <div class="frame">
+      <div class="bar"><span class="dot" style="background:var(--ntest)"></span><b style="font-size:13px">Detail drawer</b><span style="flex:1"></span><span class="mono" style="color:var(--dim)">✕</span></div>
+      <div style="padding:12px">
+        <div class="meta mono">10 SEP 1969 · USA · GRAND VALLEY, CO</div>
+        <div class="ttl" style="margin:2px 0 8px">RULISON — United States PNE:PLO</div>
+        <div class="ph" style="height:70px;margin-bottom:10px">case description / blast diagram</div>
+        <div style="display:flex;gap:8px">
+          <span class="btn pri">＋ Add to collection</span>
+          <span class="btn">🏷 Tag…</span>
+        </div>
+        <div class="callout">primary capture point — “Add” + a tag picker live in the drawer header too (star icon).</div>
+      </div>
+    </div>
+
+    <!-- Multi-select action bar -->
+    <div class="frame">
+      <div class="bar"><span class="dot" style="background:var(--accent)"></span><b style="font-size:13px">Map / Timeline · Select mode</b><span style="flex:1"></span><span class="chip">⬚ box-select</span></div>
+      <div style="position:relative;padding:0">
+        <div class="ph" style="height:150px;border:none;border-bottom:1px solid var(--line)">map / timeline canvas — click markers to toggle, or drag a box to lasso</div>
+        <!-- floating action bar -->
+        <div style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:rgba(10,13,18,.92);border:1px solid var(--line);border-radius:10px;padding:8px 12px">
+          <b class="mono" style="color:#cfe3ff">6 selected</b>
+          <span class="btn pri">＋ Add to collection</span>
+          <span class="btn">🏷 Tag</span>
+          <span class="btn">Clear</span>
+        </div>
+      </div>
+      <div style="padding:10px 12px"><div class="callout">“Select mode” toggle turns normal click-to-open into click-to-toggle; a floating bar batches the action.</div></div>
+    </div>
+  </div>
+
+  <!-- persistent tray button -->
+  <div class="frame" style="margin-top:16px">
+    <div class="bar"><b style="font-size:13px">Persistent collection indicator (top bar)</b></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px">
+      <span class="chip">Both</span><span class="chip">Timeline</span><span class="chip">Map</span>
+      <span style="flex:1"></span>
+      <span class="btn pri">🗂 Collection · <b>6</b> ▾</span>
+      <div class="callout" style="margin:0">always-visible count; click to open the tray (Frame ②). Badge pulses when you add.</div>
+    </div>
+  </div>
+
+  <!-- ============ FRAME 2: COLLECTION TRAY ============ -->
+  <h2>② The Collection — a curated working set</h2>
+  <p class="sub">Reuses the existing <span class="mono">CaseRow</span> (dot · date · agency · location · sparklines). Grouped by tag (or dataset). One click → Correlate.</p>
+  <div class="frame" style="max-width:420px">
+    <div class="bar">
+      <b style="font-size:13px">🗂 Untitled collection</b><span class="chip"><b>6</b> cases</span>
+      <span style="flex:1"></span><span class="mono" style="color:var(--dim)">save ▾</span>
+    </div>
+    <div style="padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)">
+      <span class="tag" style="background:rgba(122,184,255,.18);color:#bcd9ff">● Nevada corridor 4</span>
+      <span class="tag" style="background:rgba(167,139,250,.18);color:#d6c8ff">● 1947 wave 2</span>
+      <span class="tag" style="background:rgba(255,255,255,.05);color:var(--mut)">＋ new tag</span>
+    </div>
+    <div class="meta mono" style="padding:8px 12px 2px;color:var(--dim)">NEVADA CORRIDOR</div>
+    <div class="row"><span class="dot" style="background:var(--ntest);margin-top:4px"></span><div style="flex:1"><div class="meta mono">05 JUL 1957 · USA · NTS</div><div class="ttl">BOLTZMANN — US weapons R&D</div><div style="margin-top:4px"><span class="spark"></span> <small>12 kt</small></div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+    <div class="row"><span class="dot" style="background:var(--uap);margin-top:4px"></span><div style="flex:1"><div class="meta mono">1964 · USAF · NELLIS AFB, NV</div><div class="ttl">UAP near restricted airspace</div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+    <div class="row"><span class="dot" style="background:var(--ninc);margin-top:4px"></span><div style="flex:1"><div class="meta mono">1968 · USA · NV</div><div class="ttl">Faultless — contained PNE</div><div style="margin-top:4px"><span class="spark"></span> <small>200 kt–1 Mt</small></div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+    <div class="meta mono" style="padding:10px 12px 2px;color:var(--dim)">1947 WAVE</div>
+    <div class="row"><span class="dot" style="background:var(--uapcat);margin-top:4px"></span><div style="flex:1"><div class="meta mono">1947 · CATALOG · ROSWELL, NM</div><div class="ttl">Roswell debris field</div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+    <div style="display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)">
+      <span class="btn pri" style="flex:1;justify-content:center">📊 Correlate →</span>
+      <span class="btn">Clear</span>
+    </div>
+  </div>
+  <div class="callout">Decisions to react to: (a) name it <b>Collection</b> / Dossier / Board / Tray? (b) tags as colored chips vs folders? (c) auto-suggest “add nearby” using findNearby?</div>
+
+  <!-- ============ FRAME 3: CORRELATE ============ -->
+  <h2>③ Correlate — the payoff view</h2>
+  <p class="sub">Opens over the set. Two sliders (distance km · time years) drive every panel live, using <span class="mono">findNearby</span>.</p>
+  <div class="frame">
+    <div class="bar">
+      <b style="font-size:13px">📊 Correlate · Nevada corridor + 1947 wave</b>
+      <span style="flex:1"></span>
+      <span class="chip">distance ≤ <b>200 km</b> ━●━━</span>
+      <span class="chip">time ≤ <b>2 yr</b> ━━●━</span>
+      <span class="chip">cross-dataset only ✓</span>
+    </div>
+
+    <!-- stat strip -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--line)">
+      <div style="flex:1;padding:10px 14px;border-right:1px solid var(--line)"><div class="meta mono">CASES</div><div style="font-size:20px;font-weight:700">6</div></div>
+      <div style="flex:1;padding:10px 14px;border-right:1px solid var(--line)"><div class="meta mono">DATASETS</div><div style="font-size:13px;margin-top:4px"><span class="dot" style="background:var(--ntest);display:inline-block"></span> <span class="dot" style="background:var(--uap);display:inline-block"></span> <span class="dot" style="background:var(--ninc);display:inline-block"></span> <span class="dot" style="background:var(--uapcat);display:inline-block"></span> 4</div></div>
+      <div style="flex:1;padding:10px 14px;border-right:1px solid var(--line)"><div class="meta mono">TIME SPAN</div><div style="font-size:20px;font-weight:700">1947–68 <small>21 yr</small></div></div>
+      <div style="flex:1;padding:10px 14px;border-right:1px solid var(--line)"><div class="meta mono">GEO SPREAD</div><div style="font-size:20px;font-weight:700">~520 km</div></div>
+      <div style="flex:1;padding:10px 14px"><div class="meta mono">CORRELATION</div><div style="font-size:20px;font-weight:700;color:var(--note)">High <small>7 links</small></div></div>
+    </div>
+
+    <div class="grid two" style="gap:0">
+      <!-- NETWORK GRAPH -->
+      <div style="border-right:1px solid var(--line);padding:12px">
+        <div class="meta mono" style="margin-bottom:6px">PROXIMITY NETWORK <small>— nodes = cases, edges = within km &amp; yr; thicker = closer</small></div>
+        <svg viewBox="0 0 360 220" width="100%" height="220" style="background:rgba(255,255,255,.015);border-radius:6px">
+          <line x1="90" y1="70" x2="190" y2="60" stroke="#ffb454" stroke-width="3" opacity=".8"/>
+          <line x1="190" y1="60" x2="160" y2="150" stroke="#7ab8ff" stroke-width="2" opacity=".6"/>
+          <line x1="90" y1="70" x2="160" y2="150" stroke="#7ab8ff" stroke-width="1.5" opacity=".4"/>
+          <line x1="190" y1="60" x2="285" y2="110" stroke="#7ab8ff" stroke-width="1.5" opacity=".4"/>
+          <line x1="285" y1="110" x2="300" y2="180" stroke="#fff" stroke-width="1" opacity=".25" stroke-dasharray="3 3"/>
+          <g font-family="JetBrains Mono,monospace" font-size="8" fill="#a3aebd">
+            <circle cx="90" cy="70" r="11" fill="#ffd166"/><text x="90" y="90" text-anchor="middle">BOLTZMANN</text>
+            <circle cx="190" cy="60" r="11" fill="#7ab8ff"/><text x="190" y="44" text-anchor="middle">UAP·Nellis</text>
+            <circle cx="160" cy="150" r="11" fill="#ef476f"/><text x="160" y="172" text-anchor="middle">Faultless</text>
+            <circle cx="285" cy="110" r="9" fill="#34d399"/><text x="285" y="95" text-anchor="middle">Roswell</text>
+            <circle cx="300" cy="180" r="8" fill="#a78bfa"/><text x="300" y="198" text-anchor="middle">milestone</text>
+          </g>
+        </svg>
+        <div class="legend"><span><b style="color:#ffb454">━</b> strong (close in km+yr)</span><span><b style="color:#7ab8ff">━</b> medium</span><span><b style="color:#fff">┄</b> weak</span></div>
+      </div>
+
+      <!-- PROXIMITY MATRIX -->
+      <div style="padding:12px">
+        <div class="meta mono" style="margin-bottom:6px">PAIRWISE MATRIX <small>— km / Δyears between every pair</small></div>
+        <svg viewBox="0 0 360 220" width="100%" height="220">
+          <g font-family="JetBrains Mono,monospace" font-size="8" fill="#6b7685">
+            <text x="60" y="14">BLZ</text><text x="100" y="14">UAP</text><text x="140" y="14">FLT</text><text x="180" y="14">ROS</text><text x="220" y="14">MIL</text>
+          </g>
+          <!-- 5x5 heat cells -->
+          <g>
+            <!-- row labels -->
+            <g font-family="JetBrains Mono,monospace" font-size="8" fill="#6b7685">
+              <text x="8" y="46">BLZ</text><text x="8" y="86">UAP</text><text x="8" y="126">FLT</text><text x="8" y="166">ROS</text><text x="8" y="206">MIL</text>
+            </g>
+          </g>
+          <!-- cells (darker = closer) -->
+          <g>
+            <rect x="48" y="34" width="34" height="34" fill="#222"/>
+            <rect x="88" y="34" width="34" height="34" fill="#7a5a1f"/><rect x="128" y="34" width="34" height="34" fill="#8a4a1f"/><rect x="168" y="34" width="34" height="34" fill="#2a2f1a"/><rect x="208" y="34" width="34" height="34" fill="#23262e"/>
+            <rect x="48" y="74" width="34" height="34" fill="#7a5a1f"/><rect x="88" y="74" width="34" height="34" fill="#222"/><rect x="128" y="74" width="34" height="34" fill="#9a3a1f"/><rect x="168" y="74" width="34" height="34" fill="#2a2f1a"/><rect x="208" y="74" width="34" height="34" fill="#23262e"/>
+            <rect x="48" y="114" width="34" height="34" fill="#8a4a1f"/><rect x="88" y="114" width="34" height="34" fill="#9a3a1f"/><rect x="128" y="114" width="34" height="34" fill="#222"/><rect x="168" y="114" width="34" height="34" fill="#2a2f1a"/><rect x="208" y="114" width="34" height="34" fill="#23262e"/>
+            <rect x="48" y="154" width="34" height="34" fill="#2a2f1a"/><rect x="88" y="154" width="34" height="34" fill="#2a2f1a"/><rect x="128" y="154" width="34" height="34" fill="#2a2f1a"/><rect x="168" y="154" width="34" height="34" fill="#222"/><rect x="208" y="154" width="34" height="34" fill="#23262e"/>
+            <rect x="48" y="194" width="34" height="20" fill="#23262e"/><rect x="88" y="194" width="34" height="20" fill="#23262e"/><rect x="128" y="194" width="34" height="20" fill="#23262e"/><rect x="168" y="194" width="34" height="20" fill="#23262e"/><rect x="208" y="194" width="34" height="20" fill="#222"/>
+          </g>
+        </svg>
+        <div class="legend"><span><b style="color:#ff8a3d">▮</b> near (km+yr)</span><span><b style="color:#2a2f1a">▮</b> far</span><span>hover a cell → the pair</span></div>
+      </div>
+    </div>
+
+    <div class="grid two" style="gap:0;border-top:1px solid var(--line)">
+      <!-- MINI MAP -->
+      <div style="border-right:1px solid var(--line);padding:12px">
+        <div class="meta mono" style="margin-bottom:6px">MAP — collection points + great-circle links + hotspot rings</div>
+        <div class="ph" style="height:150px;position:relative">
+          <svg viewBox="0 0 360 150" width="100%" height="150" style="position:absolute;inset:0">
+            <circle cx="150" cy="80" r="30" fill="none" stroke="#7ab8ff" stroke-opacity=".25" stroke-dasharray="3 3"/>
+            <line x1="150" y1="80" x2="190" y2="70" stroke="#ffb454" stroke-width="1.5"/>
+            <line x1="150" y1="80" x2="140" y2="105" stroke="#7ab8ff" stroke-width="1"/>
+            <circle cx="150" cy="80" r="5" fill="#ffd166"/><circle cx="190" cy="70" r="5" fill="#7ab8ff"/><circle cx="140" cy="105" r="5" fill="#ef476f"/><circle cx="250" cy="60" r="5" fill="#34d399"/>
+          </svg>
+        </div>
+      </div>
+      <!-- MINI TIMELINE + FINDINGS -->
+      <div style="padding:12px">
+        <div class="meta mono" style="margin-bottom:6px">TIMELINE — collection events (temporal clustering)</div>
+        <svg viewBox="0 0 360 40" width="100%" height="40">
+          <line x1="10" y1="30" x2="350" y2="30" stroke="rgba(255,255,255,.12)"/>
+          <circle cx="40" cy="30" r="4" fill="#34d399"/><circle cx="150" cy="30" r="4" fill="#7ab8ff"/><circle cx="165" cy="30" r="4" fill="#ffd166"/><circle cx="180" cy="30" r="4" fill="#ef476f"/><circle cx="300" cy="30" r="4" fill="#a78bfa"/>
+          <g font-family="JetBrains Mono,monospace" font-size="8" fill="#6b7685"><text x="30" y="14">1947</text><text x="150" y="14">1957–68</text><text x="290" y="14">2012</text></g>
+        </svg>
+        <div class="meta mono" style="margin:10px 0 4px">FINDINGS</div>
+        <div style="font-size:12px;color:var(--mut)">• UAP·Nellis is within <b style="color:var(--note)">38 km / 1.2 yr</b> of test BOLTZMANN.<br>• 3 nuclear events cluster in the Nevada Test Site corridor.<br>• Roswell (1947) is a temporal outlier — no links at current thresholds.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FRAME 4: LAYOUT VARIATIONS ============ -->
+  <h2>④ Where it lives — two layout options</h2>
+  <div class="grid two">
+    <div class="frame">
+      <div class="bar"><b style="font-size:13px">Option A · Tray + modal</b></div>
+      <div style="padding:12px">
+        <div class="ph" style="height:120px">main views unchanged</div>
+        <div style="margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;align-items:center;gap:8px;background:var(--panel2)">
+          <b class="mono" style="color:#cfe3ff">🗂 6</b><span class="ph" style="height:22px;flex:1;border:none">collection tray docked bottom-right ▸ expands up</span><span class="btn pri">Correlate</span>
+        </div>
+        <div class="callout">Correlate opens as a full-screen overlay. Lightweight; nothing else moves.</div>
+      </div>
+    </div>
+    <div class="frame">
+      <div class="bar"><b style="font-size:13px">Option B · 4th view tab</b></div>
+      <div style="padding:12px">
+        <div style="display:flex;gap:6px;margin-bottom:8px"><span class="chip">Both</span><span class="chip">Timeline</span><span class="chip">Map</span><span class="chip" style="border-color:rgba(122,184,255,.5);color:#cfe3ff;background:rgba(122,184,255,.16)">Correlate</span></div>
+        <div class="ph" style="height:130px">Correlate becomes a first-class view next to Both / Timeline / Map; collection lives in a right rail.</div>
+        <div class="callout">Heavier, but makes correlation a permanent part of the app rather than a side feature.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note" style="margin-top:30px">React on: naming · capture (multi-select vs one-at-a-time) · which correlation panels matter most (network / matrix / map / timeline) · Option A vs B · whether collections persist (localStorage) &amp; are shareable via URL.</p>
+
+</div>
+</body>
+</html>

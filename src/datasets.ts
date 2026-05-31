@@ -3,7 +3,13 @@
 // whether it participates in the geographic map view (datasets like Stargate
 // have date+source but no useful per-record geographic data).
 
-export type DatasetId = "uap" | "nuclear-test" | "nuclear-incident" | "stargate";
+export type DatasetId =
+  | "uap"
+  | "uap-catalog"
+  | "nuclear-test"
+  | "nuclear-incident"
+  | "nuclear-physics"
+  | "stargate";
 
 export type Dataset = {
   id: DatasetId;
@@ -28,6 +34,17 @@ export const DATASETS: Record<DatasetId, Dataset> = {
     sourceLabel: "war.gov/ufo",
     sourceUrl: "https://www.war.gov/ufo/",
   },
+  "uap-catalog": {
+    id: "uap-catalog",
+    name: "UAP Verification Catalog",
+    shortName: "UAP Catalog",
+    color: "#34d399",
+    hasGeo: true,
+    description:
+      "Curated catalog of publicly available, not-widely-debunked UAP imagery/video scored on six verification dimensions, plus sworn Congressional testimony and key published works.",
+    sourceLabel: "UAP Verification Catalog",
+    sourceUrl: "https://www.aaro.mil/",
+  },
   "nuclear-test": {
     id: "nuclear-test",
     name: "Nuclear Weapons Tests",
@@ -49,6 +66,17 @@ export const DATASETS: Record<DatasetId, Dataset> = {
       'US military "Broken Arrow" weapons accidents and major civilian reactor incidents.',
     sourceLabel: "atomicarchive.com · Wikipedia",
     sourceUrl: "https://www.atomicarchive.com/almanac/broken-arrows/index.html",
+  },
+  "nuclear-physics": {
+    id: "nuclear-physics",
+    name: "Nuclear Physics Milestones",
+    shortName: "Physics Milestones",
+    color: "#a78bfa",
+    hasGeo: true,
+    description:
+      "Landmark discoveries, inventions, and milestones in nuclear and particle physics, 1896–present, placed at the city where each occurred. Each entry links to its canonical Wikipedia article.",
+    sourceLabel: "Wikipedia",
+    sourceUrl: "https://en.wikipedia.org/wiki/Nuclear_physics",
   },
   stargate: {
     id: "stargate",

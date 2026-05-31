@@ -17,11 +17,12 @@ import { select } from "d3-selection";
 import { zoom as d3zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import "d3-transition"; // augments d3-selection with .transition()
 import type { Case } from "./types";
-import { AGENCY_COLORS, AGENCY_SHORT } from "./theme";
+import { AGENCY_COLORS } from "./theme";
 import { geocode } from "./locations";
 import { getLatLng } from "./proximity";
 import type { NotableHotspot } from "./notableHotspots";
-import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
+import { CaseRow } from "./CaseList";
+import { AddToCasesButton } from "./AddToCasesButton";
 
 type Props = {
   /** Cases for marker rendering — pre-filtered by hotspot focus if any. */
@@ -776,37 +777,15 @@ export function MapView({
                   (a.incidentDate || "9999").localeCompare(b.incidentDate || "9999"),
                 )
                 .map((c) => (
-                  <Button
+                  <CaseRow
                     key={c.id}
-                    variant="text"
-                    onClick={() => {
-                      onSelect(c);
+                    kase={c}
+                    onSelect={(x) => {
+                      onSelect(x);
                       setPopover(null);
                     }}
-                    sx={{
-                      justifyContent: "flex-start",
-                      textAlign: "left",
-                      px: 1,
-                      py: 0.5,
-                      textTransform: "none",
-                      color: "text.primary",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
-                    }}
-                  >
-                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ fontFamily: "JetBrains Mono, monospace" }}
-                      >
-                        {c.incidentDateRaw || "undated"} ·{" "}
-                        {AGENCY_SHORT[c.agency] || c.agency}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3 }}>
-                        {c.title.length > 80 ? c.title.slice(0, 80) + "…" : c.title}
-                      </Typography>
-                    </Box>
-                  </Button>
+                    trailing={<AddToCasesButton kase={c} />}
+                  />
                 ))}
             </Stack>
           </Box>
@@ -832,75 +811,18 @@ export function MapView({
                 Click a case to open it, or zoom further to separate.
               </Typography>
               <Stack spacing={0.5} sx={{ maxHeight: 360, overflowY: "auto" }}>
-                {rows.map(({ case: c, group: g }) => {
-                  const meta = AGENCY_COLORS[c.agency] || "#7ab8ff";
-                  return (
-                    <Button
-                      key={c.id}
-                      variant="text"
-                      onClick={() => {
-                        onSelect(c);
-                        setPopover(null);
-                      }}
-                      sx={{
-                        justifyContent: "flex-start",
-                        textAlign: "left",
-                        px: 1,
-                        py: 0.5,
-                        textTransform: "none",
-                        color: "text.primary",
-                        "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, width: "100%" }}>
-                        <Box
-                          sx={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: "50%",
-                            bgcolor: meta,
-                            mt: 0.75,
-                            flexShrink: 0,
-                          }}
-                        />
-                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", flexGrow: 1, minWidth: 0 }}>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ fontFamily: "JetBrains Mono, monospace", fontSize: 9.5 }}
-                          >
-                            {c.incidentDateRaw || "undated"} · {AGENCY_SHORT[c.agency] || c.agency} · {g.display}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 500, lineHeight: 1.3, fontSize: 12 }}
-                          >
-                            {c.title.length > 80 ? c.title.slice(0, 80) + "…" : c.title}
-                          </Typography>
-                          {(typeof c.yieldKt === "number" ||
-                            (c.dataset === "nuclear-test" && (c.subtype || c.type))) && (
-                            <Stack
-                              direction="row"
-                              spacing={1.25}
-                              alignItems="center"
-                              sx={{ mt: 0.5, flexWrap: "wrap", rowGap: 0.5 }}
-                            >
-                              {typeof c.yieldKt === "number" && (
-                                <YieldSparkline kt={c.yieldKt} ktUpper={c.yieldKtUpper} />
-                              )}
-                              {c.dataset === "nuclear-test" && (
-                                <AltitudeSparkline
-                                  altM={c.altitudeM}
-                                  typeStr={c.subtype || c.type || ""}
-                                />
-                              )}
-                            </Stack>
-                          )}
-                        </Box>
-                      </Box>
-                    </Button>
-                  );
-                })}
+                {rows.map(({ case: c, group: g }) => (
+                  <CaseRow
+                    key={c.id}
+                    kase={c}
+                    location={g.display}
+                    onSelect={(x) => {
+                      onSelect(x);
+                      setPopover(null);
+                    }}
+                    trailing={<AddToCasesButton kase={c} />}
+                  />
+                ))}
               </Stack>
               <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <Button

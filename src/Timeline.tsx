@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { CaseRow } from "./CaseList";
+import { AddToCasesButton } from "./AddToCasesButton";
 import { scaleTime } from "d3-scale";
 import { extent } from "d3-array";
 import type { Case } from "./types";
@@ -50,6 +53,19 @@ const BRUSH_BAND_HEIGHT = 26;
 const LANES_TOP = MARGIN.top + BRUSH_BAND_HEIGHT;
 const MIN_LANE_HEIGHT = 56;
 const DOT_RADIUS = 5;
+
+// Cluster circle radius grows with member count (sub-linear, capped) — same
+// idea as the map's count markers.
+const clusterRadius = (n: number) => Math.min(15, 6 + Math.sqrt(n) * 1.9);
+
+// Compact label for the date span covered by a set of cases.
+function dateSpanLabel(cases: Case[]): string {
+  const raws = cases.map((c) => c.incidentDateRaw).filter(Boolean);
+  const first = raws[0];
+  const last = raws[raws.length - 1];
+  if (!first) return "";
+  return first === last ? first : `${first} – ${last}`;
+}
 
 export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDomainChange }: Props) {
   // Flatten groups into an ordered list of lanes: per dataset, one thin header
@@ -198,32 +214,70 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
     return ticks;
   }, [xScale, width]);
 
-  // Pre-compute dot positions and apply a tiny vertical jitter so co-located dots don't fully overlap.
-  // Drop any dot whose x falls outside the visible chart area (happens after zoom).
-  const dots = useMemo(() => {
+  // Per-lane color lookup (agency color, falling back to the dataset color so
+  // new datasets whose agencies aren't in AGENCY_COLORS still read correctly).
+  const laneColor = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const l of lanes) if (l.kind === "agency") m.set(l.key, AGENCY_COLORS[l.agency] || l.datasetMeta.color);
+    return m;
+  }, [lanes]);
+
+  // Group events into marks placed ON the lane centerline (no random jitter).
+  // Within a lane, events whose x-positions fall within CLUSTER_PX of a cluster
+  // anchor are merged into one count-bearing cluster — mirroring the map, where
+  // co-located points (e.g. same-day events) collapse into a single marker that
+  // lists its members. Clusters split apart as you zoom (x spreads out), but
+  // truly same-day events stay grouped and are read via the member list.
+  const CLUSTER_PX = 12;
+  const marks = useMemo(() => {
+    type Mark = { key: string; x: number; y: number; color: string; cases: Case[] };
     const xMin = MARGIN.left;
     const xMax = width - MARGIN.right;
-    return cases
-      .map((c) => {
-        if (!c.incidentDate) return null;
-        const laneKey = `${c.dataset}::${c.agency}`;
-        const layout = laneLayout.get(laneKey);
-        if (!layout || layout.kind !== "agency") return null;
-        const date = new Date(c.incidentDate);
-        const x = xScale(date);
-        const laneCenter = layout.top + layout.height / 2;
-        // Jitter by hashing the id so it's stable.
-        let h = 0;
-        for (let i = 0; i < c.id.length; i++) h = (h * 31 + c.id.charCodeAt(i)) | 0;
-        const jitter = ((h % 100) / 100 - 0.5) * (layout.height * 0.55);
-        return { case: c, x, y: laneCenter + jitter };
-      })
-      .filter((d): d is { case: Case; x: number; y: number } =>
-        d !== null && d.x >= xMin && d.x <= xMax,
-      );
-  }, [cases, xScale, laneLayout, width]);
+    // Bucket valid, in-view events by lane.
+    const byLane = new Map<string, { case: Case; x: number }[]>();
+    for (const c of cases) {
+      if (!c.incidentDate) continue;
+      const laneKey = `${c.dataset}::${c.agency}`;
+      const layout = laneLayout.get(laneKey);
+      if (!layout || layout.kind !== "agency") continue;
+      const x = xScale(new Date(c.incidentDate));
+      if (x < xMin || x > xMax) continue;
+      const arr = byLane.get(laneKey);
+      if (arr) arr.push({ case: c, x });
+      else byLane.set(laneKey, [{ case: c, x }]);
+    }
+    const out: Mark[] = [];
+    for (const [laneKey, arr] of byLane) {
+      const layout = laneLayout.get(laneKey)!;
+      const cy = layout.top + layout.height / 2;
+      const color = laneColor.get(laneKey) || "#7ab8ff";
+      arr.sort((a, b) => a.x - b.x);
+      let anchorX = -Infinity;
+      let cur: { cases: Case[]; xs: number[] } | null = null;
+      const flush = () => {
+        if (!cur) return;
+        const cx = cur.xs.reduce((s, v) => s + v, 0) / cur.xs.length;
+        out.push({ key: `${laneKey}@${Math.round(cx)}#${cur.cases.length}`, x: cx, y: cy, color, cases: cur.cases });
+        cur = null;
+      };
+      for (const d of arr) {
+        if (cur && d.x - anchorX <= CLUSTER_PX) {
+          cur.cases.push(d.case);
+          cur.xs.push(d.x);
+        } else {
+          flush();
+          cur = { cases: [d.case], xs: [d.x] };
+          anchorX = d.x;
+        }
+      }
+      flush();
+    }
+    return out;
+  }, [cases, xScale, laneLayout, width, laneColor]);
 
-  const [hovered, setHovered] = useState<{ case: Case; x: number; y: number } | null>(null);
+  const [hovered, setHovered] = useState<{ x: number; y: number; cases: Case[] } | null>(null);
+  // Persistent member list for a clicked cluster (mirrors the map's popover).
+  const [clusterPopup, setClusterPopup] = useState<{ x: number; y: number; cases: Case[] } | null>(null);
 
   // Brush selection for zoom-to-range.
   const svgRef = useRef<SVGSVGElement>(null);
@@ -238,11 +292,17 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
   const onBrushPointerDown = useCallback(
     (e: React.PointerEvent<SVGRectElement>) => {
       if (e.button !== 0) return;
+      setClusterPopup(null);
       const x = localX(e.clientX);
       setBrush({ startX: x, currentX: x });
     },
     [localX],
   );
+
+  // Stale popup coordinates after a zoom — dismiss it.
+  useEffect(() => {
+    setClusterPopup(null);
+  }, [xDomain]);
 
   // Track move/up at the document level so dragging off the chart still works.
   useEffect(() => {
@@ -475,66 +535,93 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
           />
         )}
 
-        {/* Dots */}
-        {dots.map(({ case: c, x, y }) => {
-          const color = AGENCY_COLORS[c.agency] || "#7ab8ff";
-          const isSelected = selectedCase?.id === c.id;
-          return (
-            <g key={c.id}>
-              {isSelected && (
+        {/* Marks — single events render as dots; co-located events render as a
+            count cluster that lists its members on hover/click. All sit on the
+            lane centerline (deterministic, never bleeding into other lanes). */}
+        {marks.map((m) => {
+          const n = m.cases.length;
+          const containsSelected = selectedCase ? m.cases.some((c) => c.id === selectedCase.id) : false;
+          if (n === 1) {
+            const c = m.cases[0];
+            return (
+              <g key={m.key}>
+                {containsSelected && (
+                  <circle cx={m.x} cy={m.y} r={DOT_RADIUS + 4} fill="none" stroke="#ffffff" strokeOpacity={0.9} strokeWidth={2} pointerEvents="none">
+                    <animate attributeName="r" values={`${DOT_RADIUS + 3};${DOT_RADIUS + 9};${DOT_RADIUS + 3}`} dur="1.8s" repeatCount="indefinite" />
+                    <animate attributeName="stroke-opacity" values="0.9;0.2;0.9" dur="1.8s" repeatCount="indefinite" />
+                  </circle>
+                )}
                 <circle
-                  cx={x}
-                  cy={y}
-                  r={DOT_RADIUS + 4}
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeOpacity={0.9}
-                  strokeWidth={2}
-                  pointerEvents="none"
-                >
-                  <animate
-                    attributeName="r"
-                    values={`${DOT_RADIUS + 3};${DOT_RADIUS + 9};${DOT_RADIUS + 3}`}
-                    dur="1.8s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="stroke-opacity"
-                    values="0.9;0.2;0.9"
-                    dur="1.8s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
+                  cx={m.x}
+                  cy={m.y}
+                  r={DOT_RADIUS}
+                  fill={m.color}
+                  fillOpacity={c.sourceUrl ? 0.85 : 0.4}
+                  stroke={m.color}
+                  strokeOpacity={0.8}
+                  strokeWidth={1}
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() => setHovered({ x: m.x, y: m.y, cases: m.cases })}
+                  onMouseLeave={() => setHovered(null)}
+                  onClick={() => onSelect(c)}
+                />
+              </g>
+            );
+          }
+          // Cluster
+          const r = clusterRadius(n);
+          return (
+            <g key={m.key} style={{ cursor: "pointer" }}>
+              {containsSelected && (
+                <circle cx={m.x} cy={m.y} r={r + 4} fill="none" stroke="#ffffff" strokeOpacity={0.9} strokeWidth={2} pointerEvents="none" />
               )}
               <circle
-                cx={x}
-                cy={y}
-                r={DOT_RADIUS}
-                fill={color}
-                fillOpacity={c.sourceUrl ? 0.85 : 0.4}
-                stroke={color}
-                strokeOpacity={0.8}
-                strokeWidth={1}
-                style={{ cursor: "pointer" }}
-                onMouseEnter={() => setHovered({ case: c, x, y })}
+                cx={m.x}
+                cy={m.y}
+                r={r}
+                fill={m.color}
+                fillOpacity={0.28}
+                stroke={m.color}
+                strokeOpacity={0.95}
+                strokeWidth={1.5}
+                onMouseEnter={() => setHovered({ x: m.x, y: m.y, cases: m.cases })}
                 onMouseLeave={() => setHovered(null)}
-                onClick={() => onSelect(c)}
+                onClick={(e) => {
+                  setHovered(null);
+                  // Store viewport coords so the popup stays on-screen regardless
+                  // of scroll position.
+                  setClusterPopup({ x: e.clientX, y: e.clientY, cases: m.cases });
+                }}
+              />
+              <text
+                x={m.x}
+                y={m.y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="#ffffff"
+                fontSize={Math.min(11, r)}
+                fontWeight={700}
+                fontFamily="JetBrains Mono, monospace"
+                pointerEvents="none"
               >
-                <title>{`${c.incidentDate} · ${c.agency}\n${c.title}`}</title>
-              </circle>
+                {n}
+              </text>
             </g>
           );
         })}
       </svg>
 
-      {hovered && !brush && (() => {
+      {hovered && !brush && !clusterPopup && (() => {
         const TIP_W = 320;
         const TIP_GAP = 14;
         const flipLeft = hovered.x + TIP_GAP + TIP_W > width - 8;
         const left = flipLeft
           ? Math.max(8, hovered.x - TIP_GAP - TIP_W)
           : Math.min(hovered.x + TIP_GAP, width - TIP_W - 8);
-        const top = Math.min(hovered.y + TIP_GAP, height - 80);
+        const top = Math.min(hovered.y + TIP_GAP, height - 100);
+        const n = hovered.cases.length;
+        const head = hovered.cases[0];
+        const shown = hovered.cases.slice(0, 6);
         return (
           <Box
             sx={{
@@ -553,12 +640,104 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-              {hovered.case.incidentDateRaw} · {hovered.case.agency}
+              {n === 1 ? `${head.incidentDateRaw} · ${head.agency}` : `${n} events · ${dateSpanLabel(hovered.cases)}`}
             </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3, mt: 0.5 }}>
-              {hovered.case.title}
-            </Typography>
+            {n === 1 ? (
+              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3, mt: 0.5 }}>
+                {head.title}
+              </Typography>
+            ) : (
+              <Box sx={{ mt: 0.5 }}>
+                {shown.map((c) => (
+                  <Typography key={c.id} variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3, mb: 0.25, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    • {c.title}
+                  </Typography>
+                ))}
+                {n > shown.length && (
+                  <Typography variant="caption" color="text.secondary">+{n - shown.length} more — click to list</Typography>
+                )}
+              </Box>
+            )}
           </Box>
+        );
+      })()}
+
+      {/* Cluster member list — uses the same CaseRow as the map's popover so
+          the two selection menus are visually identical. */}
+      {clusterPopup && (() => {
+        const POP_W = 340;
+        const POP_MAXH = 380;
+        const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
+        const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+        const flipLeft = clusterPopup.x + 14 + POP_W > vw - 8;
+        const left = flipLeft ? Math.max(8, clusterPopup.x - 14 - POP_W) : Math.min(clusterPopup.x + 14, vw - POP_W - 8);
+        const top = Math.max(8, Math.min(clusterPopup.y - 20, vh - POP_MAXH - 8));
+        const sorted = [...clusterPopup.cases].sort((a, b) => (a.incidentDate || "9999").localeCompare(b.incidentDate || "9999"));
+        // Can we separate this cluster by zooming? Only if its events span more
+        // than one date (same-day events stay grouped, like co-located points).
+        const msList = sorted.map((c) => (c.incidentDate ? new Date(c.incidentDate).getTime() : NaN)).filter((n) => !Number.isNaN(n));
+        const minMs = Math.min(...msList);
+        const maxMs = Math.max(...msList);
+        const canZoom = msList.length > 1 && maxMs > minMs;
+        return (
+          <>
+            {/* backdrop to dismiss */}
+            <Box onClick={() => setClusterPopup(null)} sx={{ position: "fixed", inset: 0, zIndex: 11 }} />
+            <Box
+              sx={{
+                position: "fixed",
+                left,
+                top,
+                bgcolor: "background.paper",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 1,
+                width: POP_W,
+                maxWidth: 360,
+                maxHeight: POP_MAXH,
+                display: "flex",
+                flexDirection: "column",
+                p: 1.5,
+                boxSizing: "border-box",
+                zIndex: 12,
+                boxShadow: "0 8px 28px rgba(0,0,0,0.55)",
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.25 }}>
+                {sorted.length} event{sorted.length === 1 ? "" : "s"} · {dateSpanLabel(sorted)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+                {canZoom ? "Click an event to open it, or zoom in to separate." : "Click an event to open it."}
+              </Typography>
+              <Stack spacing={0.5} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+                {sorted.map((c) => (
+                  <CaseRow
+                    key={c.id}
+                    kase={c}
+                    location={c.incidentLocation || undefined}
+                    onSelect={(x) => { onSelect(x); setClusterPopup(null); }}
+                    trailing={<AddToCasesButton kase={c} />}
+                  />
+                ))}
+              </Stack>
+              {canZoom && (
+                <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <Button
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => {
+                      const pad = Math.max((maxMs - minMs) * 0.15, 7 * 86400 * 1000);
+                      onXDomainChange([new Date(minMs - pad), new Date(maxMs + pad)]);
+                      setClusterPopup(null);
+                    }}
+                    sx={{ textTransform: "none", fontSize: 11 }}
+                  >
+                    Zoom in further
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          </>
         );
       })()}
 

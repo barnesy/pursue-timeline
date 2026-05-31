@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wireframes · Add Case → Cases button → Combined view</title>
+<style>
+  :root{
+    --bg:#0a0d12; --panel:#11161e; --panel2:#161c26; --line:rgba(255,255,255,0.10);
+    --txt:#e6ecf2; --mut:#a3aebd; --dim:#6b7685; --accent:#7ab8ff;
+    --uap:#7ab8ff; --uapcat:#34d399; --ntest:#ffd166; --ninc:#ef476f; --phys:#a78bfa; --star:#9aa5b1;
+    --note:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 Inter,system-ui,sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:26px 24px 80px}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--mut);margin:0 0 12px;max-width:780px}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+  .frame{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:12px;color:var(--mut);background:rgba(255,255,255,.02)}
+  .ph{border:1px dashed rgba(255,255,255,.18);border-radius:6px;color:var(--dim);display:flex;align-items:center;justify-content:center;text-align:center}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:7px;padding:6px 12px;font-size:13px;color:var(--txt);background:rgba(255,255,255,.03);white-space:nowrap}
+  .btn.pri{background:rgba(122,184,255,.16);border-color:rgba(122,184,255,.5);color:#cfe3ff}
+  .btn.ghost{background:transparent}
+  .btn.added{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.5);color:#86efac}
+  .badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#7ab8ff;color:#0a0d12;font-size:11px;font-weight:800;font-family:"JetBrains Mono",monospace}
+  .meta{font-size:10px;color:var(--mut);font-family:"JetBrains Mono",monospace}
+  .ttl{font-size:13px;font-weight:600}
+  .spark{height:6px;border-radius:3px;background:linear-gradient(90deg,#3a4250,#7a8595);width:64px;display:inline-block;vertical-align:middle}
+  .callout{border-left:2px solid var(--note);padding:2px 0 2px 10px;margin:8px 0 0;color:var(--note);font-size:12px;font-family:"JetBrains Mono",monospace}
+  .lead{color:var(--mut);max-width:820px}
+  .grid{display:grid;gap:16px}
+  .two{grid-template-columns:1fr 1fr}
+  .row{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
+  small{color:var(--dim)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut)}
+  .winhdr{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0d1117;border-bottom:1px solid var(--line)}
+  .logo{font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Add Case → header button → combined view <span class="note">— wireframe v2</span></h1>
+  <p class="lead">Three moves: <b>① + Add Case</b> on any case &nbsp;→&nbsp; <b>② a header button counts them</b> &nbsp;→&nbsp; <b>③ click it to open all collected cases together</b> in one focused view with their correlations.</p>
+
+  <!-- ===================== ① + ADD CASE ===================== -->
+  <h2>① + Add Case — one button, everywhere a case appears</h2>
+  <p class="sub">Same control in the detail drawer, on case rows (cluster popovers / search), and on map/timeline markers. Toggles to “Added”.</p>
+  <div class="grid two">
+    <!-- drawer -->
+    <div class="frame">
+      <div class="bar"><span class="dot" style="background:var(--ntest)"></span><b style="font-size:13px">Case detail</b><span style="flex:1"></span><span class="mono" style="color:var(--dim)">✕</span></div>
+      <div style="padding:12px">
+        <div class="meta">10 SEP 1969 · USA · GRAND VALLEY, CO</div>
+        <div class="ttl" style="margin:2px 0 10px">RULISON — United States PNE:PLO</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <span class="btn pri" style="font-weight:700">＋ Add Case</span>
+          <span class="btn ghost">Source ↗</span>
+        </div>
+        <div class="ph" style="height:64px">description / blast diagram</div>
+        <div class="callout">primary action, top of the drawer. After adding it becomes <b>✓ Added</b> (click again to remove).</div>
+      </div>
+    </div>
+    <!-- rows + marker -->
+    <div class="frame">
+      <div class="bar"><span class="dot" style="background:var(--accent)"></span><b style="font-size:13px">Case rows &amp; markers</b></div>
+      <div>
+        <div class="row"><span class="dot" style="background:var(--ntest);margin-top:4px"></span><div style="flex:1"><div class="meta">05 JUL 1957 · USA · NTS</div><div class="ttl">BOLTZMANN — US weapons R&D</div></div><span class="btn" style="padding:3px 9px;font-size:12px">＋ Add</span></div>
+        <div class="row"><span class="dot" style="background:var(--uap);margin-top:4px"></span><div style="flex:1"><div class="meta">1964 · USAF · NELLIS AFB, NV</div><div class="ttl">UAP near restricted airspace</div></div><span class="btn added" style="padding:3px 9px;font-size:12px">✓ Added</span></div>
+        <div class="row" style="border:none"><span class="dot" style="background:var(--ninc);margin-top:4px"></span><div style="flex:1"><div class="meta">1968 · USA · NV</div><div class="ttl">Faultless — contained PNE</div></div><span class="btn" style="padding:3px 9px;font-size:12px">＋ Add</span></div>
+        <div style="padding:10px 12px"><div class="callout">in a cluster popover, each row gets a compact <b>＋ Add</b>; on a map/timeline marker, a small ＋ appears on hover.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ② HEADER BUTTON ===================== -->
+  <h2>② The header button — live counter</h2>
+  <p class="sub">Sits in the top bar by the view toggles. The number ticks up (and pulses) each time you add. This is the entry point to the combined view.</p>
+  <div class="frame">
+    <div class="winhdr">
+      <span class="logo">Off Nominal</span>
+      <span class="meta">2730 of 2730 cases</span>
+      <span class="ph" style="height:26px;width:200px;border-style:solid;border-color:var(--line)">⌕ Search…</span>
+      <span style="flex:1"></span>
+      <span class="chip">Both</span><span class="chip">Timeline</span><span class="chip">Map</span>
+      <span class="btn pri" style="font-weight:700;gap:8px">🗂 Cases <span class="badge">5</span></span>
+    </div>
+    <div style="padding:14px;display:flex;gap:26px;align-items:center;flex-wrap:wrap">
+      <div>
+        <div class="meta" style="margin-bottom:6px">STATES</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="btn" style="opacity:.5">🗂 Cases <span class="badge" style="background:#3a4655;color:#cfe3ff">0</span></span>
+          <small>empty → muted / hidden</small>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <span class="btn pri" style="font-weight:700">🗂 Cases <span class="badge">5</span></span>
+          <small>has items → highlighted, badge pulses on add</small>
+        </div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div class="callout" style="margin:0">Naming options for the button: <b>Cases</b> · My Cases · Collection · Selected · Tray. (Counter is the key signal.)</div>
+        <div class="callout">Optional: tiny ▾ caret for a quick peek/clear without opening the full view.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ③ COMBINED VIEW ===================== -->
+  <h2>③ Click the button → all cases together in one view</h2>
+  <p class="sub">A focused overlay brings every collected case into a single frame: a map fit to all of them, a compact timeline of just them, the case list, and their correlations.</p>
+  <div class="frame">
+    <div class="winhdr">
+      <span class="logo" style="font-size:14px">🗂 Your Cases · 5</span>
+      <span class="meta">spanning 1957–1969 · ~520 km</span>
+      <span style="flex:1"></span>
+      <span class="chip">distance ≤ <b style="color:var(--txt)">200 km</b> ━●━</span>
+      <span class="chip">time ≤ <b style="color:var(--txt)">2 yr</b> ━●━</span>
+      <span class="btn ghost">Save</span><span class="btn ghost">Clear</span><span class="mono" style="color:var(--dim)">✕ close</span>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1.25fr .9fr;gap:0">
+      <!-- LEFT: map of all cases together -->
+      <div style="border-right:1px solid var(--line)">
+        <div class="meta" style="padding:8px 12px 0">MAP — fit to all 5 · links show pairs within thresholds</div>
+        <div class="ph" style="height:240px;margin:8px 12px;border:none;position:relative">
+          <svg viewBox="0 0 460 230" width="100%" height="240" style="position:absolute;inset:0;background:rgba(255,255,255,.015);border-radius:6px">
+            <circle cx="170" cy="120" r="48" fill="none" stroke="#7ab8ff" stroke-opacity=".2" stroke-dasharray="3 3"/>
+            <line x1="170" y1="120" x2="215" y2="100" stroke="#ffb454" stroke-width="2"/>
+            <line x1="170" y1="120" x2="150" y2="160" stroke="#7ab8ff" stroke-width="1.4"/>
+            <line x1="215" y1="100" x2="150" y2="160" stroke="#7ab8ff" stroke-width="1"/>
+            <circle cx="170" cy="120" r="6" fill="#ffd166"/><circle cx="215" cy="100" r="6" fill="#7ab8ff"/><circle cx="150" cy="160" r="6" fill="#ef476f"/>
+            <circle cx="330" cy="70" r="6" fill="#34d399"/><circle cx="360" cy="175" r="6" fill="#a78bfa"/>
+          </svg>
+        </div>
+        <div class="meta" style="padding:0 12px">TIMELINE — just these 5</div>
+        <svg viewBox="0 0 460 44" width="100%" height="44" style="padding:4px 12px 10px">
+          <line x1="6" y1="30" x2="454" y2="30" stroke="rgba(255,255,255,.12)"/>
+          <circle cx="120" cy="30" r="5" fill="#ffd166"/><circle cx="150" cy="30" r="5" fill="#7ab8ff"/><circle cx="240" cy="30" r="5" fill="#ef476f"/><circle cx="250" cy="30" r="5" fill="#34d399"/><circle cx="300" cy="30" r="5" fill="#a78bfa"/>
+          <g class="mono" font-size="8" fill="#6b7685"><text x="110" y="14">1957</text><text x="235" y="14">1964–69</text></g>
+        </svg>
+      </div>
+
+      <!-- RIGHT: list + correlation findings -->
+      <div>
+        <div class="meta" style="padding:8px 12px 4px">CASES IN VIEW (5)</div>
+        <div class="row" style="padding:6px 12px"><span class="dot" style="background:var(--ntest);margin-top:4px"></span><div style="flex:1"><div class="meta">05 JUL 1957 · USA · NTS</div><div class="ttl">BOLTZMANN</div><span class="spark"></span> <small>12 kt</small></div><span class="mono" style="color:var(--dim)">✕</span></div>
+        <div class="row" style="padding:6px 12px"><span class="dot" style="background:var(--uap);margin-top:4px"></span><div style="flex:1"><div class="meta">1964 · USAF · NELLIS AFB</div><div class="ttl">UAP near restricted airspace</div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+        <div class="row" style="padding:6px 12px"><span class="dot" style="background:var(--ninc);margin-top:4px"></span><div style="flex:1"><div class="meta">1968 · USA · NV</div><div class="ttl">Faultless — contained PNE</div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+        <div class="row" style="padding:6px 12px"><span class="dot" style="background:var(--uapcat);margin-top:4px"></span><div style="flex:1"><div class="meta">1947 · CATALOG · ROSWELL</div><div class="ttl">Roswell debris field</div></div><span class="mono" style="color:var(--dim)">✕</span></div>
+
+        <div class="meta" style="padding:10px 12px 4px;border-top:1px solid var(--line)">CORRELATIONS</div>
+        <div style="padding:0 12px 12px;font-size:12px;color:var(--mut)">
+          • UAP·Nellis ↔ BOLTZMANN — <b style="color:var(--note)">38 km / 1.2 yr</b><br>
+          • 3 events cluster in the Nevada Test Site corridor<br>
+          • Roswell (1947) — temporal outlier, no links yet
+          <div style="margin-top:8px"><span class="btn" style="font-size:12px">View as network ⬡</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout">“All cases together” = the payoff. Map auto-fits the set; sliders re-draw the links live (existing <span class="mono">findNearby</span>). Removing a case here updates the header counter.</div>
+
+  <!-- ===================== VARIATION ===================== -->
+  <h2>How it opens — two options</h2>
+  <div class="grid two">
+    <div class="frame">
+      <div class="bar"><b style="font-size:13px">A · Focused overlay (shown above)</b></div>
+      <div style="padding:12px">
+        <div class="ph" style="height:120px">dim the app, open the combined view as a centered overlay</div>
+        <div class="callout" style="margin-top:10px">Self-contained; nothing in the main app moves. ✕ returns you exactly where you were.</div>
+      </div>
+    </div>
+    <div class="frame">
+      <div class="bar"><b style="font-size:13px">B · Filter the main views to the set</b></div>
+      <div style="padding:12px">
+        <div style="display:flex;align-items:center;gap:8px;border:1px solid rgba(122,184,255,.4);background:rgba(122,184,255,.08);border-radius:7px;padding:6px 10px;margin-bottom:8px">
+          <b class="mono" style="color:#cfe3ff;font-size:12px">Showing your 5 cases</b><span style="flex:1"></span><span class="btn ghost" style="font-size:12px">Exit ✕</span>
+        </div>
+        <div class="ph" style="height:96px">the normal Both/Timeline/Map views, but data = only the collected cases</div>
+        <div class="callout" style="margin-top:10px">Reuses the real map + timeline at full power; correlation rail docks on the right.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note" style="margin-top:28px">React on: button label (<b>Cases</b>?) · Option A overlay vs B filter-the-app · do we need Save/named collections in v1, or just one live working set?</p>
+
+</div>
+</body>
+</html>

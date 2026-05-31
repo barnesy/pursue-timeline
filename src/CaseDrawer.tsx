@@ -17,6 +17,7 @@ import { DATASETS } from "./datasets";
 import { findNearby, formatDaysDelta, formatKm } from "./proximity";
 import { BlastDiagram } from "./BlastDiagram";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
+import { AddToCasesButton } from "./AddToCasesButton";
 
 type Props = {
   kase: Case;
@@ -102,6 +103,9 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
           <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.25 }}>
             {kase.title}
           </Typography>
+          <Box sx={{ mt: 1.5 }}>
+            <AddToCasesButton kase={kase} variant="full" />
+          </Box>
         </Box>
         <Stack direction="row" spacing={0.5} sx={{ ml: 1 }}>
           {onCollapse && (

@@ -1,0 +1,458 @@
+[
+ {
+  "Year": "1896",
+  "Event": "Discovery of radioactivity",
+  "Type": "Discovery",
+  "Key Figure(s)": "Henri Becquerel",
+  "Location": "Paris, France",
+  "Significance": "First observation of spontaneous radiation from uranium salts"
+ },
+ {
+  "Year": "1898",
+  "Event": "Discovery of polonium and radium",
+  "Type": "Discovery",
+  "Key Figure(s)": "Marie & Pierre Curie",
+  "Location": "Paris, France",
+  "Significance": "Isolated new radioactive elements; coined the term 'radioactivity'"
+ },
+ {
+  "Year": "1899",
+  "Event": "Identification of alpha and beta rays",
+  "Type": "Discovery",
+  "Key Figure(s)": "Ernest Rutherford",
+  "Location": "Montreal, Canada (McGill)",
+  "Significance": "Distinguished two types of radioactive emission"
+ },
+ {
+  "Year": "1900",
+  "Event": "Discovery of gamma rays",
+  "Type": "Discovery",
+  "Key Figure(s)": "Paul Villard",
+  "Location": "Paris, France",
+  "Significance": "Identified the third, highly penetrating form of radiation"
+ },
+ {
+  "Year": "1905",
+  "Event": "Mass-energy equivalence (E=mc2)",
+  "Type": "Milestone",
+  "Key Figure(s)": "Albert Einstein",
+  "Location": "Bern, Switzerland",
+  "Significance": "Theoretical basis for energy released in nuclear reactions"
+ },
+ {
+  "Year": "1911",
+  "Event": "Discovery of the atomic nucleus",
+  "Type": "Discovery",
+  "Key Figure(s)": "Ernest Rutherford",
+  "Location": "Manchester, England",
+  "Significance": "Gold foil experiment revealed a dense, positive nucleus"
+ },
+ {
+  "Year": "1913",
+  "Event": "Bohr model of the atom",
+  "Type": "Milestone",
+  "Key Figure(s)": "Niels Bohr",
+  "Location": "Copenhagen, Denmark",
+  "Significance": "Quantized electron orbits; foundation of atomic structure"
+ },
+ {
+  "Year": "1919",
+  "Event": "First artificial nuclear transmutation",
+  "Type": "Milestone",
+  "Key Figure(s)": "Ernest Rutherford",
+  "Location": "Manchester, England",
+  "Significance": "Converted nitrogen to oxygen; discovered the proton"
+ },
+ {
+  "Year": "1928",
+  "Event": "Dirac equation predicts antimatter",
+  "Type": "Milestone",
+  "Key Figure(s)": "Paul Dirac",
+  "Location": "Cambridge, England",
+  "Significance": "Relativistic electron equation implied the existence of antiparticles"
+ },
+ {
+  "Year": "1929",
+  "Event": "Invention of the Van de Graaff generator",
+  "Type": "Invention",
+  "Key Figure(s)": "Robert J. Van de Graaff",
+  "Location": "Princeton, New Jersey, USA",
+  "Significance": "High-voltage electrostatic accelerator for nuclear experiments"
+ },
+ {
+  "Year": "1930",
+  "Event": "Postulation of the neutrino",
+  "Type": "Milestone",
+  "Key Figure(s)": "Wolfgang Pauli",
+  "Location": "Zurich, Switzerland",
+  "Significance": "Proposed an unseen particle to explain energy conservation in beta decay"
+ },
+ {
+  "Year": "1932",
+  "Event": "Discovery of the neutron",
+  "Type": "Discovery",
+  "Key Figure(s)": "James Chadwick",
+  "Location": "Cambridge, England (Cavendish)",
+  "Significance": "Completed the picture of the nucleus; enabled fission research"
+ },
+ {
+  "Year": "1932",
+  "Event": "Cockcroft-Walton accelerator splits the atom",
+  "Type": "Invention",
+  "Key Figure(s)": "Cockcroft & Walton",
+  "Location": "Cambridge, England (Cavendish)",
+  "Significance": "First fully artificial nuclear disintegration using accelerated protons"
+ },
+ {
+  "Year": "1932",
+  "Event": "Invention of the cyclotron",
+  "Type": "Invention",
+  "Key Figure(s)": "Ernest O. Lawrence",
+  "Location": "Berkeley, California, USA",
+  "Significance": "Enabled high-energy circular particle acceleration"
+ },
+ {
+  "Year": "1932",
+  "Event": "Discovery of the positron",
+  "Type": "Discovery",
+  "Key Figure(s)": "Carl D. Anderson",
+  "Location": "Pasadena, California, USA (Caltech)",
+  "Significance": "First antimatter particle observed; confirmed Dirac's prediction"
+ },
+ {
+  "Year": "1934",
+  "Event": "Discovery of artificial (induced) radioactivity",
+  "Type": "Discovery",
+  "Key Figure(s)": "Irene & Frederic Joliot-Curie",
+  "Location": "Paris, France",
+  "Significance": "Created radioactive isotopes from stable elements"
+ },
+ {
+  "Year": "1935",
+  "Event": "Yukawa predicts the meson",
+  "Type": "Milestone",
+  "Key Figure(s)": "Hideki Yukawa",
+  "Location": "Osaka, Japan",
+  "Significance": "Proposed a carrier particle for the strong nuclear force"
+ },
+ {
+  "Year": "1936",
+  "Event": "Discovery of the muon",
+  "Type": "Discovery",
+  "Key Figure(s)": "Anderson & Neddermeyer",
+  "Location": "Pasadena, California, USA (Caltech)",
+  "Significance": "First second-generation lepton found in cosmic rays"
+ },
+ {
+  "Year": "1938",
+  "Event": "Discovery of nuclear fission",
+  "Type": "Discovery",
+  "Key Figure(s)": "Hahn, Strassmann, Meitner, Frisch",
+  "Location": "Berlin, Germany & Stockholm, Sweden",
+  "Significance": "Splitting of uranium nucleus; basis for reactors and weapons"
+ },
+ {
+  "Year": "1940",
+  "Event": "Synthesis of neptunium (first transuranium element)",
+  "Type": "Discovery",
+  "Key Figure(s)": "McMillan & Abelson",
+  "Location": "Berkeley, California, USA",
+  "Significance": "First element created beyond uranium on the periodic table"
+ },
+ {
+  "Year": "1941",
+  "Event": "Synthesis and identification of plutonium",
+  "Type": "Discovery",
+  "Key Figure(s)": "Seaborg, McMillan, Wahl, Kennedy",
+  "Location": "Berkeley, California, USA",
+  "Significance": "Key fissile element for reactors and weapons"
+ },
+ {
+  "Year": "1942",
+  "Event": "Chicago Pile-1: first nuclear reactor",
+  "Type": "Invention",
+  "Key Figure(s)": "Enrico Fermi",
+  "Location": "Chicago, Illinois, USA",
+  "Significance": "First human-made self-sustaining nuclear chain reaction"
+ },
+ {
+  "Year": "1945",
+  "Event": "First nuclear weapon detonation (Trinity)",
+  "Type": "Milestone",
+  "Key Figure(s)": "J. Robert Oppenheimer (Manhattan Project)",
+  "Location": "Alamogordo, New Mexico, USA",
+  "Significance": "First test of an atomic bomb"
+ },
+ {
+  "Year": "1947",
+  "Event": "Discovery of the pion",
+  "Type": "Discovery",
+  "Key Figure(s)": "Cecil Powell et al.",
+  "Location": "Bristol, England",
+  "Significance": "Confirmed Yukawa's predicted strong-force carrier particle"
+ },
+ {
+  "Year": "1951",
+  "Event": "Experimental Breeder Reactor I (EBR-I)",
+  "Type": "Invention",
+  "Key Figure(s)": "Walter Zinn",
+  "Location": "Idaho, USA (Arco)",
+  "Significance": "First reactor to generate usable electricity from nuclear energy"
+ },
+ {
+  "Year": "1951",
+  "Event": "First stellarator fusion concept",
+  "Type": "Invention",
+  "Key Figure(s)": "Lyman Spitzer",
+  "Location": "Princeton, New Jersey, USA",
+  "Significance": "Pioneering magnetic confinement design for fusion"
+ },
+ {
+  "Year": "1952",
+  "Event": "First hydrogen (thermonuclear) bomb (Ivy Mike)",
+  "Type": "Milestone",
+  "Key Figure(s)": "Edward Teller, Stanislaw Ulam",
+  "Location": "Enewetak Atoll, Marshall Islands",
+  "Significance": "First test of a nuclear fusion weapon"
+ },
+ {
+  "Year": "1954",
+  "Event": "Invention of the tokamak",
+  "Type": "Invention",
+  "Key Figure(s)": "Igor Tamm & Andrei Sakharov",
+  "Location": "Moscow, USSR (Kurchatov Institute)",
+  "Significance": "Magnetic confinement design that became the leading fusion reactor concept"
+ },
+ {
+  "Year": "1954",
+  "Event": "Obninsk: first grid-connected nuclear power plant",
+  "Type": "Invention",
+  "Key Figure(s)": "Soviet program",
+  "Location": "Obninsk, USSR (Russia)",
+  "Significance": "First reactor to supply electricity to a power grid"
+ },
+ {
+  "Year": "1955",
+  "Event": "Discovery of the antiproton",
+  "Type": "Discovery",
+  "Key Figure(s)": "Segre, Chamberlain, Wiegand, Ypsilantis",
+  "Location": "Berkeley, California, USA (Bevatron)",
+  "Significance": "First antibaryon observed; confirmed antimatter counterpart of the proton"
+ },
+ {
+  "Year": "1956",
+  "Event": "Calder Hall: first commercial-scale nuclear power station",
+  "Type": "Invention",
+  "Key Figure(s)": "UKAEA",
+  "Location": "Calder Hall, England",
+  "Significance": "First industrial-scale nuclear electricity generation"
+ },
+ {
+  "Year": "1956",
+  "Event": "Experimental detection of the neutrino",
+  "Type": "Discovery",
+  "Key Figure(s)": "Cowan & Reines",
+  "Location": "Savannah River, South Carolina, USA",
+  "Significance": "Confirmed existence of the neutrino predicted by Pauli"
+ },
+ {
+  "Year": "1964",
+  "Event": "Quark model proposed",
+  "Type": "Milestone",
+  "Key Figure(s)": "Gell-Mann & Zweig",
+  "Location": "Pasadena, California, USA (Caltech) & CERN",
+  "Significance": "Quarks as fundamental constituents of protons and neutrons"
+ },
+ {
+  "Year": "1964",
+  "Event": "Discovery of CP violation",
+  "Type": "Discovery",
+  "Key Figure(s)": "Cronin & Fitch",
+  "Location": "Brookhaven, New York, USA",
+  "Significance": "Matter-antimatter asymmetry seen in neutral kaon decays"
+ },
+ {
+  "Year": "1968",
+  "Event": "Discovery of quarks (deep inelastic scattering)",
+  "Type": "Discovery",
+  "Key Figure(s)": "Friedman, Kendall, Taylor",
+  "Location": "Stanford, California, USA (SLAC)",
+  "Significance": "Experimental evidence for internal structure of nucleons"
+ },
+ {
+  "Year": "1968",
+  "Event": "Tokamak T-3 achieves breakthrough plasma temperatures",
+  "Type": "Invention",
+  "Key Figure(s)": "Lev Artsimovich",
+  "Location": "Moscow, USSR (Kurchatov Institute)",
+  "Significance": "Demonstrated tokamak viability; spurred global fusion adoption"
+ },
+ {
+  "Year": "1983",
+  "Event": "Discovery of W and Z bosons",
+  "Type": "Discovery",
+  "Key Figure(s)": "Carlo Rubbia, Simon van der Meer",
+  "Location": "Geneva, Switzerland (CERN)",
+  "Significance": "Confirmed electroweak unification theory"
+ },
+ {
+  "Year": "1983",
+  "Event": "Joint European Torus (JET) begins operation",
+  "Type": "Invention",
+  "Key Figure(s)": "Euratom / EU consortium",
+  "Location": "Culham, England",
+  "Significance": "Largest operational tokamak; set fusion power records"
+ },
+ {
+  "Year": "1985",
+  "Event": "Tevatron reaches full operation",
+  "Type": "Invention",
+  "Key Figure(s)": "Fermilab",
+  "Location": "Batavia, Illinois, USA",
+  "Significance": "World's highest-energy collider until the LHC; later discovered the top quark (1995)"
+ },
+ {
+  "Year": "1991",
+  "Event": "First controlled fusion energy release (JET)",
+  "Type": "Milestone",
+  "Key Figure(s)": "JET team",
+  "Location": "Culham, England",
+  "Significance": "First significant controlled fusion power from a magnetic device"
+ },
+ {
+  "Year": "1995",
+  "Event": "First creation of antihydrogen",
+  "Type": "Milestone",
+  "Key Figure(s)": "CERN team",
+  "Location": "Geneva, Switzerland (CERN)",
+  "Significance": "First synthesis of antimatter atoms"
+ },
+ {
+  "Year": "1995",
+  "Event": "Discovery of the top quark",
+  "Type": "Discovery",
+  "Key Figure(s)": "CDF & DZero collaborations",
+  "Location": "Batavia, Illinois, USA (Fermilab/Tevatron)",
+  "Significance": "Completed the third generation of quarks"
+ },
+ {
+  "Year": "1998",
+  "Event": "Discovery of neutrino oscillation (atmospheric)",
+  "Type": "Discovery",
+  "Key Figure(s)": "Super-Kamiokande collaboration (Kajita)",
+  "Location": "Kamioka, Japan",
+  "Significance": "First evidence neutrinos change flavor and therefore have mass"
+ },
+ {
+  "Year": "2001",
+  "Event": "Confirmation of solar neutrino oscillation",
+  "Type": "Discovery",
+  "Key Figure(s)": "SNO collaboration (McDonald)",
+  "Location": "Sudbury, Ontario, Canada",
+  "Significance": "Resolved the solar neutrino problem; confirmed neutrino mass"
+ },
+ {
+  "Year": "2002",
+  "Event": "Synthesis of oganesson (element 118)",
+  "Type": "Discovery",
+  "Key Figure(s)": "Oganessian et al. (JINR)",
+  "Location": "Dubna, Russia",
+  "Significance": "Heaviest element yet synthesized; completes period 7"
+ },
+ {
+  "Year": "2008",
+  "Event": "Large Hadron Collider (LHC) commissioned",
+  "Type": "Invention",
+  "Key Figure(s)": "CERN collaboration",
+  "Location": "Geneva, Switzerland (CERN)",
+  "Significance": "World's largest and most powerful particle accelerator"
+ },
+ {
+  "Year": "2010",
+  "Event": "First trapping of antihydrogen atoms",
+  "Type": "Milestone",
+  "Key Figure(s)": "ALPHA & ASACUSA collaborations",
+  "Location": "Geneva, Switzerland (CERN Antimatter Factory)",
+  "Significance": "First time antimatter atoms were held long enough to study"
+ },
+ {
+  "Year": "2011",
+  "Event": "Antihydrogen confined for ~1000 seconds",
+  "Type": "Milestone",
+  "Key Figure(s)": "ALPHA collaboration",
+  "Location": "Geneva, Switzerland (CERN Antimatter Factory)",
+  "Significance": "Long-duration trapping enabling precision antimatter measurements"
+ },
+ {
+  "Year": "2012",
+  "Event": "Discovery of the Higgs boson",
+  "Type": "Discovery",
+  "Key Figure(s)": "ATLAS & CMS collaborations",
+  "Location": "Geneva, Switzerland (CERN/LHC)",
+  "Significance": "Confirmed the mechanism giving particles mass"
+ },
+ {
+  "Year": "2015",
+  "Event": "Discovery of pentaquarks",
+  "Type": "Discovery",
+  "Key Figure(s)": "LHCb collaboration",
+  "Location": "Geneva, Switzerland (CERN/LHC)",
+  "Significance": "First observation of five-quark exotic hadrons predicted decades earlier"
+ },
+ {
+  "Year": "2020",
+  "Event": "ITER assembly begins",
+  "Type": "Invention",
+  "Key Figure(s)": "ITER international consortium",
+  "Location": "Saint-Paul-les-Durance, France",
+  "Significance": "World's largest tokamak, aiming to demonstrate net fusion power at scale"
+ },
+ {
+  "Year": "2020",
+  "Event": "Discovery of a fully-charm tetraquark X(6900)",
+  "Type": "Discovery",
+  "Key Figure(s)": "LHCb collaboration",
+  "Location": "Geneva, Switzerland (CERN/LHC)",
+  "Significance": "First tetraquark made entirely of heavy charm quarks"
+ },
+ {
+  "Year": "2021",
+  "Event": "First laser cooling of antihydrogen",
+  "Type": "Milestone",
+  "Key Figure(s)": "ALPHA collaboration",
+  "Location": "Geneva, Switzerland (CERN Antimatter Factory)",
+  "Significance": "Enabled far more precise spectroscopy of antimatter atoms"
+ },
+ {
+  "Year": "2022",
+  "Event": "Fusion ignition (net energy gain) at NIF",
+  "Type": "Milestone",
+  "Key Figure(s)": "NIF team",
+  "Location": "Livermore, California, USA (NIF)",
+  "Significance": "First controlled fusion reaction producing net energy gain (inertial confinement)"
+ },
+ {
+  "Year": "2022",
+  "Event": "New pentaquark and first tetraquark pair observed",
+  "Type": "Discovery",
+  "Key Figure(s)": "LHCb collaboration",
+  "Location": "Geneva, Switzerland (CERN/LHC)",
+  "Significance": "Expanded the family of exotic hadrons; 66+ new hadrons found at the LHC"
+ },
+ {
+  "Year": "2023",
+  "Event": "First measurement of gravity's effect on antimatter",
+  "Type": "Milestone",
+  "Key Figure(s)": "ALPHA-g collaboration",
+  "Location": "Geneva, Switzerland (CERN Antimatter Factory)",
+  "Significance": "Confirmed antihydrogen falls downward, consistent with general relativity"
+ },
+ {
+  "Year": "2025",
+  "Event": "First observation of CP violation in baryons",
+  "Type": "Discovery",
+  "Key Figure(s)": "LHCb collaboration",
+  "Location": "Geneva, Switzerland (CERN/LHC)",
+  "Significance": "First matter-antimatter asymmetry seen in baryons (Lambda_b decays)"
+ }
+]

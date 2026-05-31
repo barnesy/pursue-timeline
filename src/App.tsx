@@ -26,6 +26,9 @@ import { useTheme } from "@mui/material/styles";
 import Drawer from "@mui/material/Drawer";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import Badge from "@mui/material/Badge";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from "react-resizable-panels";
 import { useRef } from "react";
 import type React from "react";
@@ -36,6 +39,8 @@ import { Timeline } from "./Timeline";
 import { MapView } from "./MapView";
 import { CasePanel } from "./CaseDrawer";
 import { HotspotsPanel } from "./HotspotsPanel";
+import { CasesOverlay } from "./CasesOverlay";
+import { useCaseIds } from "./collection";
 import {
   DATASETS,
   DATASET_IDS,
@@ -215,13 +220,17 @@ function altitudeBucketKeyFor(typeStr: string, altM: number | undefined): string
 
 const DATASET_SOURCES: DatasetSource[] = [
   { id: "uap", url: "cases.json" },
+  { id: "uap-catalog", url: "uap-catalog.json" },
   { id: "nuclear-test", url: "nuclear-tests.json" },
   { id: "nuclear-incident", url: "nuclear-incidents.json" },
+  { id: "nuclear-physics", url: "nuclear-physics.json" },
   { id: "stargate", url: "stargate.json" },
 ];
 
 export function App() {
   const [cases, setCases] = useState<Case[] | null>(null);
+  const caseIds = useCaseIds();
+  const [casesOpen, setCasesOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
   const [activeDatasets, setActiveDatasets] = useState<Set<DatasetId>>(
@@ -238,7 +247,7 @@ export function App() {
   );
   const [selected, setSelected] = useState<Case | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<ViewMode>("split");
+  const [view, setView] = useState<ViewMode>("timeline");
   const [xDomain, setXDomain] = useState<[Date, Date] | null>(null);
   // Lifted from MapView so timeline + map can both react to the same focus.
   // Now uses curated NotableHotspot definitions instead of algorithmic
@@ -251,7 +260,7 @@ export function App() {
   const detailPanelRef = useRef<ImperativePanelHandle>(null);
   const [hotspotsCollapsed, setHotspotsCollapsed] = useState(false);
   const [detailCollapsed, setDetailCollapsed] = useState(false);
-  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -808,6 +817,26 @@ export function App() {
               <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>Map</Box>
             </ToggleButton>
           </ToggleButtonGroup>
+          <Badge
+            badgeContent={caseIds.length}
+            color="primary"
+            overlap="rectangular"
+            sx={{ "& .MuiBadge-badge": { fontWeight: 800, fontFamily: "JetBrains Mono, monospace" } }}
+          >
+            <Button
+              size="small"
+              onClick={() => setCasesOpen(true)}
+              variant={caseIds.length ? "contained" : "outlined"}
+              startIcon={<Inventory2OutlinedIcon fontSize="small" />}
+              sx={{
+                textTransform: "none",
+                px: { xs: 1, md: 1.25 },
+                color: caseIds.length ? "#0a0d12" : "text.secondary",
+              }}
+            >
+              <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>Cases</Box>
+            </Button>
+          </Badge>
           <Link
             href="https://www.war.gov/ufo/"
             target="_blank"
@@ -1099,6 +1128,16 @@ export function App() {
           </Box>
         )}
       </Box>
+
+      <CasesOverlay
+        open={casesOpen}
+        onClose={() => setCasesOpen(false)}
+        allCases={cases ?? []}
+        onSelect={(c) => {
+          setCasesOpen(false);
+          setSelected(c);
+        }}
+      />
     </Box>
   );
 }
