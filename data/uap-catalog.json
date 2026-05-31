@@ -673,5 +673,24 @@
     "dvidsVideoId": "",
     "imageUrl": "",
     "imageAlt": ""
+  },
+  {
+    "dataset": "uap-catalog",
+    "id": "uc-pub-9",
+    "title": "UFOlogy: A Major Breakthrough in the Scientific Understanding of Unidentified Flying Objects",
+    "agency": "Published work",
+    "incidentDate": "1976-01-01",
+    "incidentDateRaw": "1976",
+    "incidentLocation": "",
+    "releaseDate": "",
+    "type": "PDF",
+    "subtype": "Published work · Book",
+    "redacted": false,
+    "description": "By James M. McCampbell. Aerospace engineer's systematic attempt to derive UFO characteristics - propulsion, electromagnetic interference, and physiological effects on witnesses - from the consistencies across reported sightings. An early scientific-method treatment of the phenomenon, referenced in the CIA's declassified UFO holdings.",
+    "sourceUrl": "https://archive.org/details/ufology0000mcca",
+    "videoTitle": "",
+    "dvidsVideoId": "",
+    "imageUrl": "",
+    "imageAlt": ""
   }
 ]

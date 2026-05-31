@@ -71,6 +71,9 @@ const PUB_SOURCE: Record<string, string> = {
   "The Sturrock Panel Report": "https://en.wikipedia.org/wiki/Peter_A._Sturrock",
   "AARO Historical Record Report Vol. 1": "https://www.aaro.mil/Portals/136/PDFs/AARO_Historical_Record_Report_Vol_1_2024.pdf",
   Imminent: "https://en.wikipedia.org/wiki/Luis_Elizondo",
+  // Free full-text scan (Internet Archive) — preferred over a storefront link.
+  "UFOlogy: A Major Breakthrough in the Scientific Understanding of Unidentified Flying Objects":
+    "https://archive.org/details/ufology0000mcca",
 };
 
 const s = (v: unknown) => (v == null ? "" : String(v).trim());
