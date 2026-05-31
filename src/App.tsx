@@ -728,7 +728,10 @@ export function App() {
               ? `${dateFiltered.length} of ${cases.length} cases`
               : "loading…"}
           </Typography>
-          {xDomain && (
+          {/* The date range lives in the timeline's own sticky header now.
+              Only surface it in the navbar for map-only view, where that
+              header isn't on screen. */}
+          {xDomain && view === "map" && (
             <Chip
               size="small"
               icon={<EventNoteIcon />}

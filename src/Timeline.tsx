@@ -50,7 +50,12 @@ const fmtDate = (d: Date) =>
 
 const MARGIN = { top: 40, right: 40, bottom: 16, left: 130 };
 const BRUSH_BAND_HEIGHT = 26;
-const LANES_TOP = MARGIN.top + BRUSH_BAND_HEIGHT;
+// The year axis + brush band live in a sticky header SVG of this height: year
+// labels sit at MARGIN.top-14 and the brush band spans MARGIN.top..+BAND.
+const AXIS_H = MARGIN.top + BRUSH_BAND_HEIGHT;
+// The scrolling lane body starts a hair below its own top edge (the axis is no
+// longer part of the scroll content).
+const BODY_TOP_PAD = 10;
 const MIN_LANE_HEIGHT = 56;
 const DOT_RADIUS = 5;
 
@@ -122,14 +127,14 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
   const headerBudget = headerLaneCount * HEADER_LANE_HEIGHT;
   const availableForAgencyLanes = Math.max(
     MIN_LANE_HEIGHT * Math.max(1, agencyLaneCount),
-    size.height - LANES_TOP - MARGIN.bottom - headerBudget,
+    size.height - BODY_TOP_PAD - MARGIN.bottom - headerBudget,
   );
   const laneHeight = Math.max(
     MIN_LANE_HEIGHT,
     agencyLaneCount > 0 ? availableForAgencyLanes / agencyLaneCount : MIN_LANE_HEIGHT,
   );
   const height =
-    LANES_TOP +
+    BODY_TOP_PAD +
     MARGIN.bottom +
     headerBudget +
     agencyLaneCount * laneHeight;
@@ -164,7 +169,7 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
   // taller agency lanes. Maps each lane's composite key to a {top, height}.
   const laneLayout = useMemo(() => {
     const out = new Map<string, { top: number; height: number; kind: Lane["kind"] }>();
-    let y = LANES_TOP;
+    let y = BODY_TOP_PAD;
     for (const lane of lanes) {
       const h = lane.kind === "header" ? HEADER_LANE_HEIGHT : laneHeight;
       out.set(lane.key, { top: y, height: h, kind: lane.kind });
@@ -337,34 +342,186 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
   const brushHi = brush ? Math.max(brush.startX, brush.currentX) : 0;
   const brushActive = brush && brushHi - brushLo >= MIN_BRUSH_PX;
 
+  // Date-range pickers in the sticky header drive the same xDomain as the
+  // brush. Values reflect the current visible domain; bounds clamp to the full
+  // data extent. Format/parse on local Y-M-D parts to dodge the UTC
+  // off-by-one that new Date("yyyy-mm-dd") introduces.
+  const [curLo, curHi] = xScale.domain() as [Date, Date];
+  const [fullLo, fullHi] = effectiveFull;
+  const toInput = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate(),
+    ).padStart(2, "0")}`;
+  const fromInput = (s: string): Date | null => {
+    const [y, m, d] = s.split("-").map(Number);
+    return y && m && d ? new Date(y, m - 1, d) : null;
+  };
+  const applyFrom = (s: string) => {
+    const lo = fromInput(s);
+    if (lo && lo.getTime() < curHi.getTime()) onXDomainChange([lo, curHi]);
+  };
+  const applyTo = (s: string) => {
+    const hi = fromInput(s);
+    if (hi && hi.getTime() > curLo.getTime()) onXDomainChange([curLo, hi]);
+  };
+  const dateInputSx = {
+    bgcolor: "rgba(255,255,255,0.04)",
+    color: "text.primary",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 1,
+    px: 0.75,
+    py: 0.35,
+    fontFamily: "JetBrains Mono, monospace",
+    fontSize: 12,
+    colorScheme: "dark",
+    outline: "none",
+    "&:focus": { borderColor: "rgba(122,184,255,0.65)" },
+  } as const;
+
   return (
     <Box
-      ref={wrapRef}
       sx={{
         position: "relative",
         height: "100%",
         width: "100%",
-        overflowX: "hidden",
-        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <svg
-        ref={svgRef}
-        width={width}
-        height={height}
-        style={{ display: "block", userSelect: "none" }}
+      {/* Sticky control + axis header — stays pinned while the lanes scroll */}
+      <Box
+        sx={{
+          flex: "0 0 auto",
+          bgcolor: "background.default",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
       >
-        {/* Dedicated zoom band — visible affordance for brushing */}
-        <BrushBand
-          x={MARGIN.left}
-          y={MARGIN.top}
-          width={Math.max(0, width - MARGIN.left - MARGIN.right)}
-          height={BRUSH_BAND_HEIGHT}
-          dragging={!!brush}
-          onPointerDown={onBrushPointerDown}
-          onDoubleClick={resetZoom}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+            pl: `${MARGIN.left}px`,
+            pr: `${MARGIN.right}px`,
+            py: 0.75,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", letterSpacing: "0.08em", fontWeight: 700 }}
+          >
+            RANGE
+          </Typography>
+          <Box
+            component="input"
+            type="date"
+            aria-label="Range start date"
+            value={toInput(curLo)}
+            min={toInput(fullLo)}
+            max={toInput(curHi)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => applyFrom(e.target.value)}
+            sx={dateInputSx}
+          />
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            →
+          </Typography>
+          <Box
+            component="input"
+            type="date"
+            aria-label="Range end date"
+            value={toInput(curHi)}
+            min={toInput(curLo)}
+            max={toInput(fullHi)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => applyTo(e.target.value)}
+            sx={dateInputSx}
+          />
+          <Box sx={{ flexGrow: 1 }} />
+          {isZoomed && (
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", fontFamily: "JetBrains Mono, monospace" }}
+            >
+              {fmtDate(curLo)} – {fmtDate(curHi)}
+            </Typography>
+          )}
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<RestartAltIcon />}
+            onClick={resetZoom}
+            disabled={!isZoomed}
+            sx={{ textTransform: "none" }}
+          >
+            Reset
+          </Button>
+        </Box>
+        <svg
+          ref={svgRef}
+          width={width}
+          height={AXIS_H}
+          style={{ display: "block", userSelect: "none" }}
+        >
+          {/* Year labels */}
+          {yearTicks.map((y) => {
+            const x = xScale(new Date(`${y}-01-01`));
+            if (x < MARGIN.left || x > width - MARGIN.right) return null;
+            return (
+              <text
+                key={y}
+                x={x}
+                y={MARGIN.top - 14}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.5)"
+                fontSize={11}
+                fontFamily="JetBrains Mono, monospace"
+              >
+                {y}
+              </text>
+            );
+          })}
+          {/* Dedicated zoom band — visible affordance for brushing */}
+          <BrushBand
+            x={MARGIN.left}
+            y={MARGIN.top}
+            width={Math.max(0, width - MARGIN.left - MARGIN.right)}
+            height={BRUSH_BAND_HEIGHT}
+            dragging={!!brush}
+            onPointerDown={onBrushPointerDown}
+            onDoubleClick={resetZoom}
+          />
+          {/* Selection highlight within the band while dragging */}
+          {brush && (
+            <rect
+              x={brushLo}
+              y={MARGIN.top}
+              width={brushHi - brushLo}
+              height={BRUSH_BAND_HEIGHT}
+              fill="#7ab8ff"
+              fillOpacity={0.2}
+              stroke="#7ab8ff"
+              strokeOpacity={brushActive ? 0.65 : 0.25}
+              pointerEvents="none"
+            />
+          )}
+        </svg>
+      </Box>
 
+      {/* Scrolling lane body */}
+      <Box
+        ref={wrapRef}
+        sx={{
+          flex: "1 1 auto",
+          position: "relative",
+          overflowX: "hidden",
+          overflowY: "auto",
+        }}
+      >
+        <svg
+          width={width}
+          height={height}
+          style={{ display: "block", userSelect: "none" }}
+        >
         {/* Lane backgrounds + labels — interleaves dataset headers and agency rows */}
         {lanes.map((lane, i) => {
           const layout = laneLayout.get(lane.key)!;
@@ -493,40 +650,30 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
           );
         })}
 
-        {/* Year ticks */}
+        {/* Year gridlines (labels live in the sticky header) */}
         {yearTicks.map((y) => {
           const x = xScale(new Date(`${y}-01-01`));
           if (x < MARGIN.left || x > width - MARGIN.right) return null;
           return (
-            <g key={y}>
-              <line
-                x1={x}
-                x2={x}
-                y1={LANES_TOP}
-                y2={height - MARGIN.bottom + 4}
-                stroke="rgba(255,255,255,0.04)"
-              />
-              <text
-                x={x}
-                y={MARGIN.top - 14}
-                textAnchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                fontSize={11}
-                fontFamily="JetBrains Mono, monospace"
-              >
-                {y}
-              </text>
-            </g>
+            <line
+              key={y}
+              x1={x}
+              x2={x}
+              y1={0}
+              y2={height - MARGIN.bottom + 4}
+              stroke="rgba(255,255,255,0.04)"
+            />
           );
         })}
 
-        {/* Brush rectangle (visual feedback while dragging) — spans full chart vertically */}
+        {/* Brush rectangle (visual feedback while dragging) — spans the full
+            scrolling lane body vertically */}
         {brush && (
           <rect
             x={brushLo}
-            y={MARGIN.top}
+            y={0}
             width={brushHi - brushLo}
-            height={Math.max(0, height - MARGIN.top - MARGIN.bottom)}
+            height={height}
             fill="#7ab8ff"
             fillOpacity={0.14}
             stroke="#7ab8ff"
@@ -661,6 +808,7 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
           </Box>
         );
       })()}
+      </Box>
 
       {/* Cluster member list — uses the same CaseRow as the map's popover so
           the two selection menus are visually identical. */}
@@ -740,43 +888,6 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
           </>
         );
       })()}
-
-      {/* Zoom status pill — only shown when zoomed */}
-      {isZoomed && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 12,
-            right: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-              fontFamily: "JetBrains Mono, monospace",
-              bgcolor: "rgba(10,13,18,0.85)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-            }}
-          >
-            {fmtDate(xScale.domain()[0])} – {fmtDate(xScale.domain()[1])}
-          </Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<RestartAltIcon />}
-            onClick={resetZoom}
-          >
-            Reset
-          </Button>
-        </Box>
-      )}
     </Box>
   );
 }
