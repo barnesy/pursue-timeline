@@ -39,6 +39,7 @@ import {
   TILT_H,
   TILT_HORIZON_Y,
   TILT_RATIO,
+  fireballLuminosity,
 } from "./BlastDiagram";
 import type { DetonationEnv, UnitSystem } from "./blastPhysics";
 
@@ -90,6 +91,23 @@ function mapPxPerMeter(lat: number, zoom: number): number {
   return Math.pow(2, zoom) / (156543.03392 * Math.cos((lat * Math.PI) / 180));
 }
 
+const RINGS_SRC = "blast-rings";
+
+// Geodesic damage rings as real map geometry — MapLibre projects these
+// correctly under any pan/zoom/pitch (no overlay drift). Outer-first so inner
+// rings paint on top.
+function ringsFeatureCollection(lat: number, lng: number, rings: DamageRing[]) {
+  const sorted = [...rings].sort((a, b) => b.radiusM - a.radiusM);
+  return {
+    type: "FeatureCollection" as const,
+    features: sorted.map((r) => {
+      const f = circle([lng, lat], Math.max(0.0001, r.radiusM) / 1000, { steps: 128, units: "kilometers" }) as Feature<Polygon>;
+      f.properties = { key: r.key, color: r.color, label: r.label };
+      return f;
+    }),
+  };
+}
+
 function buildStyle(): maplibregl.StyleSpecification {
   return {
     version: 8,
@@ -108,23 +126,20 @@ function buildStyle(): maplibregl.StyleSpecification {
   };
 }
 
-// Fit the camera so the outer ring fits, biased so ground zero lands ~59% down
-// the view (matching TiltedView's burst position) — leaving sky room above for
-// the rising mushroom cloud.
+// Frame the camera so the outer ring's diameter fills ~80% of the view width,
+// centered on ground zero. We compute the zoom directly from the target on-
+// screen size rather than fitBounds, so the largest circle lands at ~80% width.
 function fitToOuter(map: maplibregl.Map, lat: number, lng: number, outerRadiusM: number) {
-  // Frame the outer ring with extra margin (zoomed out a little) for context.
-  const ring = circle([lng, lat], (outerRadiusM * 2.1) / 1000, { steps: 24, units: "kilometers" }) as Feature<Polygon>;
-  const coords = ring.geometry.coordinates[0] as [number, number][];
-  const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-  const h = map.getContainer().clientHeight || 400;
-  map.fitBounds(bounds, {
-    // Heavier top padding pushes ground zero toward the lower-middle so the
-    // cloud has headroom — matching the SVG scene's burst placement.
-    padding: { top: Math.round(h * 0.34), bottom: Math.round(h * 0.06), left: 40, right: 40 },
+  const W = map.getContainer().clientWidth || 600;
+  const targetDiameterPx = 0.8 * W;
+  const pxPerMeter = targetDiameterPx / (2 * Math.max(1, outerRadiusM));
+  const zoom = Math.log2(pxPerMeter * 156543.03392 * Math.cos((lat * Math.PI) / 180));
+  map.easeTo({
+    center: [lng, lat],
+    zoom: Math.min(18, Math.max(1, zoom)),
     pitch: MAP_PITCH,
     bearing: 0,
     duration: 700,
-    maxZoom: 16,
   });
 }
 
@@ -211,6 +226,9 @@ export function BlastMap3D({
     map.on("move", updateSceneTransform);
 
     map.on("load", () => {
+      // 3D buildings (best-effort — a flaky vector source must not block the
+      // rings/animation that follow).
+      try {
       map.addLayer({
         id: "buildings-3d",
         type: "fill-extrusion",
@@ -222,6 +240,25 @@ export function BlastMap3D({
           "fill-extrusion-height": ["interpolate", ["linear"], ["zoom"], 14, 0, 15.5, ["coalesce", ["get", "render_height"], 8]],
           "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
           "fill-extrusion-opacity": 0.85,
+        },
+      });
+      } catch { /* vector source unavailable — skip buildings */ }
+      // Geodesic blast rings as real map geometry (track the camera perfectly).
+      map.addSource(RINGS_SRC, { type: "geojson", data: ringsFeatureCollection(lat, lng, damageRings) });
+      map.addLayer({
+        id: "ring-fill",
+        type: "fill",
+        source: RINGS_SRC,
+        paint: { "fill-color": ["get", "color"], "fill-opacity": 0.1 },
+      });
+      map.addLayer({
+        id: "ring-line",
+        type: "line",
+        source: RINGS_SRC,
+        paint: {
+          "line-color": ["get", "color"],
+          "line-width": ["case", ["==", ["get", "key"], hoveredRingKey ?? " "], 4, 2],
+          "line-opacity": 0.95,
         },
       });
       setReady(true);
@@ -289,6 +326,21 @@ export function BlastMap3D({
     map.setLayoutProperty("buildings-3d", "visibility", buildingsOn ? "visible" : "none");
   }, [buildingsOn, ready]);
 
+  // Update the geodesic ring geometry when the case / location changes.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const src = map.getSource(RINGS_SRC) as maplibregl.GeoJSONSource | undefined;
+    if (src) src.setData(ringsFeatureCollection(lat, lng, damageRings));
+  }, [lat, lng, ringsKey, ready, damageRings]);
+
+  // Highlight the hovered ring (heavier stroke) — paint expression, no rebuild.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !map.getLayer("ring-line")) return;
+    map.setPaintProperty("ring-line", "line-width", ["case", ["==", ["get", "key"], hoveredRingKey ?? " "], 4, 2]);
+  }, [hoveredRingKey, ready]);
+
   const handlePlay = useCallback(() => {
     if (playing) {
       setPlaying(false);
@@ -322,10 +374,29 @@ export function BlastMap3D({
   const detT = rawTime - PRE_FLIGHT_DURATION;
   const tLabel = detT < 0 ? `T− ${(-detT).toFixed(1)} s` : `T+ ${detT < 10 ? detT.toFixed(1) : Math.round(detT)} s`;
   const subLabel = detT < 0 ? "bomber inbound" : "detonation";
+  // Detonation luminosity drives a full-bleed flash that washes the whole map
+  // (no bounded rectangle), centered roughly on ground zero near the bottom-
+  // middle of the framing.
+  const lum = detT > 0 ? fireballLuminosity(detT) : 0;
 
   return (
     <Box sx={{ position: "relative", width: "100%", height: "100%", minHeight: 360 }}>
       <div ref={containerRef} style={{ width: "100%", height: "100%", borderRadius: 4 }} />
+
+      {/* Full-bleed detonation flash — covers the entire map edge-to-edge so
+          the flash never reveals the animation's rectangular bounds. */}
+      {lum > 0.02 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 1,
+            mixBlendMode: "screen",
+            background: `radial-gradient(120% 90% at 50% 62%, rgba(255,228,170,${(lum * 0.95).toFixed(3)}) 0%, rgba(255,150,70,${(lum * 0.6).toFixed(3)}) 30%, rgba(255,120,40,0) 68%)`,
+          }}
+        />
+      )}
 
       {/* The EXACT TiltedView animation, overlaid transparently on the map.
           preserveAspectRatio="none" stretches the 800×480 scene to the
@@ -345,6 +416,7 @@ export function BlastMap3D({
             hoveredRingKey={hoveredRingKey}
             units={units}
             mapEnabled
+            phenomenaOnly
           />
         </g>
       </svg>

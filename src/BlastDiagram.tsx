@@ -1057,7 +1057,11 @@ export function BlastDiagram({ kase }: Props) {
         <Tooltip title="Open large view">
           <IconButton
             size="small"
-            onClick={() => setMapModalOpen(true)}
+            onClick={() => {
+              // Fullscreen opens in 3D — make sure we have a location for it.
+              if (geo.status === "idle") requestLocation();
+              setMapModalOpen(true);
+            }}
             sx={{ p: 0.5, color: "text.secondary" }}
             aria-label="Expand map view"
           >
@@ -1346,24 +1350,31 @@ export function BlastDiagram({ kase }: Props) {
             <CloseIcon fontSize="small" />
           </IconButton>
 
-          {/* Map fills the available space on the left. */}
+          {/* Map fills the available space on the left. Fullscreen opens in
+              3D when we have the user's location; otherwise it falls back to
+              the tilted SVG animation (with a prompt to enable location). */}
           <Box sx={{ flex: { xs: "1 1 60%", md: "1 1 70%" }, minHeight: 0, position: "relative" }}>
-            {topDownMode === "location" && geo.status === "granted" && geo.coords ? (
-              <LocationMap
+            {mapModalOpen && geo.status === "granted" && geo.coords ? (
+              <BlastMap3D
                 lat={geo.coords.lat}
                 lng={geo.coords.lng}
-                hoveredLabel={hoveredRingKey ? activeRings.find((r) => r.key === hoveredRingKey)?.label : null}
-                rings={activeRings.map<BlastRing>((d) => ({
+                env={env}
+                hobM={env === "atmospheric" || env === "rocket" ? effects.optimalHobM : 0}
+                fireballM={effects.fireballM}
+                shockwavePeakM={effects.lightBlastM}
+                hoveredRingKey={hoveredRingKey}
+                units={units}
+                damageRings={activeRings.map((d) => ({
+                  key: d.key,
+                  label: d.label,
                   radiusM: ringSet[d.key],
                   color: RING_COLORS[d.key],
-                  label: d.label,
                 }))}
               />
             ) : (
-              // Default modal view: the full tilted animation, much bigger
-              // than the side panel. Same scene, scaled up for dramatic
-              // impact. Toggling to "Your map" still works.
-              <Box sx={{ height: "100%", display: "grid", placeItems: "center", p: 2 }}>
+              // No location yet — show the tilted SVG animation, and offer to
+              // enable location so the view can go 3D over the real map.
+              <Box sx={{ height: "100%", display: "grid", placeItems: "center", p: 2, position: "relative" }}>
                 <svg viewBox={`0 0 ${TILT_W} ${TILT_H}`} width="100%" height="100%" style={{ display: "block", maxHeight: "100%" }}>
                   <TiltedView
                     env={scenario === "optimal-hob" ? "atmospheric" : env}
@@ -1387,6 +1398,32 @@ export function BlastDiagram({ kase }: Props) {
                     units={units}
                   />
                 </svg>
+                {geo.status !== "granted" && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<MyLocationIcon />}
+                    onClick={requestLocation}
+                    disabled={geo.status === "asking" || geo.status === "unsupported"}
+                    sx={{
+                      position: "absolute",
+                      bottom: "8%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      textTransform: "none",
+                      bgcolor: "rgba(207,227,255,0.95)",
+                      color: "#0a0d12",
+                      fontWeight: 700,
+                      "&:hover": { bgcolor: "#cfe3ff" },
+                    }}
+                  >
+                    {geo.status === "asking"
+                      ? "Requesting location…"
+                      : geo.status === "unsupported"
+                        ? "Geolocation not supported"
+                        : "Enable location for 3D map"}
+                  </Button>
+                )}
               </Box>
             )}
           </Box>
@@ -1824,7 +1861,7 @@ function fireballTemperature(time: number): number {
 // Luminosity envelope (0..1) — drives the bloom intensity of the fireball
 // and the sky reaction. Captures the double-flash signature: peak at
 // detonation, dim, second peak, then exponential decay.
-function fireballLuminosity(time: number): number {
+export function fireballLuminosity(time: number): number {
   if (time < T_FLASH_PEAK) return 1;
   if (time < T_FLASH_DIM) {
     // First-flash decay
@@ -3243,6 +3280,7 @@ export function TiltedView({
   hoveredRingKey,
   units,
   mapEnabled,
+  phenomenaOnly,
 }: {
   env: DetonationEnv;
   hobM: number;
@@ -3255,6 +3293,12 @@ export function TiltedView({
   /** When true, skips the ground-plate fill so a Leaflet map layered
    *  behind the SVG shows through. The vignette + grid still render. */
   mapEnabled?: boolean;
+  /** When true, renders ONLY the animated phenomena (bomber, flash, fireball,
+   *  shockwave, mushroom cloud) — no static ground plane (grid, vignette,
+   *  damage-ring ellipses, ring flags, burst-point, corner legends). Used when
+   *  a real map draws the rings as geographic geometry underneath. `damageRings`
+   *  is still consulted for scale/cloud sizing. */
+  phenomenaOnly?: boolean;
 }) {
   const u: UnitSystem = units ?? "metric";
   const W = TILT_W;
@@ -3431,7 +3475,7 @@ export function TiltedView({
       {/* GRID — concentric depth lines at scaled distances showing the
           tilted plane. Drawn at 5 depth intervals from horizon to viewer
           so the surface reads as a foreshortened plane. */}
-      {(() => {
+      {!phenomenaOnly && (() => {
         const lines: React.ReactElement[] = [];
         // 6 horizontal lines + 9 vertical lines establishing the tilted plane
         for (let i = 1; i <= 6; i++) {
@@ -3472,17 +3516,19 @@ export function TiltedView({
       })()}
 
       {/* BURST-POINT VIGNETTE — radial dark gradient centered at burst */}
-      <ellipse
-        cx={burstX}
-        cy={burstY}
-        rx={Math.min(W * 0.45, outerR * scale * 1.2)}
-        ry={Math.min(W * 0.45, outerR * scale * 1.2) * TILT_RATIO}
-        fill="url(#tilt-burst-vignette)"
-      />
+      {!phenomenaOnly && (
+        <ellipse
+          cx={burstX}
+          cy={burstY}
+          rx={Math.min(W * 0.45, outerR * scale * 1.2)}
+          ry={Math.min(W * 0.45, outerR * scale * 1.2) * TILT_RATIO}
+          fill="url(#tilt-burst-vignette)"
+        />
+      )}
 
       {/* DAMAGE RINGS — foreshortened ellipses on the ground plane.
           Outer rings drawn first so inner draw on top. */}
-      {damageRings && damageRings.length > 0 && (
+      {!phenomenaOnly && damageRings && damageRings.length > 0 && (
         <g pointerEvents="none">
           {[...damageRings]
             .sort((a, b) => b.radiusM - a.radiusM)
@@ -3521,10 +3567,12 @@ export function TiltedView({
       {/* BURST POINT INDICATOR — a small bright cross on the ground at
           the burst location. Visible at all times so the user can locate
           the burst when the cloud or fireball obscures it. */}
-      <g pointerEvents="none">
-        <circle cx={burstX} cy={burstY} r={2} fill="#ffffff" opacity={0.85} />
-        <circle cx={burstX} cy={burstY} r={5} fill="none" stroke="#ffffff" strokeOpacity={0.3} strokeWidth={0.5} />
-      </g>
+      {!phenomenaOnly && (
+        <g pointerEvents="none">
+          <circle cx={burstX} cy={burstY} r={2} fill="#ffffff" opacity={0.85} />
+          <circle cx={burstX} cy={burstY} r={5} fill="none" stroke="#ffffff" strokeOpacity={0.3} strokeWidth={0.5} />
+        </g>
+      )}
 
       {/* Altitude axis removed — the B-52 below now serves as the
           altitude reference, with its trailing label showing the current
@@ -3790,8 +3838,11 @@ export function TiltedView({
         );
       })()}
 
-      {/* SKY REACTION — orange wash during peak luminosity (mirrors side view) */}
-      {bombActive && skyLum > 0.02 && fireballM > 0 && (
+      {/* SKY REACTION — orange wash during peak luminosity (mirrors side view).
+          Skipped in phenomenaOnly mode: a bounded rect would reveal the scene's
+          rectangular edges over a map; BlastMap3D draws a full-bleed flash
+          instead. */}
+      {!phenomenaOnly && bombActive && skyLum > 0.02 && fireballM > 0 && (
         <rect
           x={0}
           y={0}
@@ -3907,7 +3958,7 @@ export function TiltedView({
       {/* DAMAGE FLAGS — pop up from the front edge (6 o'clock position)
           of each ring as the shockwave reaches that radius. Front-edge
           placement puts flags closest to viewer with no obstruction. */}
-      {damageRings && damageRings.length > 0 && shockwavePeakM > 0 && (() => {
+      {!phenomenaOnly && damageRings && damageRings.length > 0 && shockwavePeakM > 0 && (() => {
         const rings = [...damageRings].sort((a, b) => a.radiusM - b.radiusM);
         const popTime = (radiusM: number): number => {
           const frac = Math.min(1, radiusM / shockwavePeakM);
@@ -4011,28 +4062,32 @@ export function TiltedView({
       })()}
 
       {/* Top-right pixel-scale legend */}
-      <text
-        x={W - 12}
-        y={14}
-        textAnchor="end"
-        fill="rgba(255,255,255,0.45)"
-        fontSize={9}
-        fontFamily="JetBrains Mono, monospace"
-      >
-        1 px ≈ {fmtMeter(1 / scale, u)}
-      </text>
+      {!phenomenaOnly && (
+        <text
+          x={W - 12}
+          y={14}
+          textAnchor="end"
+          fill="rgba(255,255,255,0.45)"
+          fontSize={9}
+          fontFamily="JetBrains Mono, monospace"
+        >
+          1 px ≈ {fmtMeter(1 / scale, u)}
+        </text>
+      )}
 
       {/* Bottom-left orientation label */}
-      <text
-        x={12}
-        y={H - 10}
-        fill="rgba(255,255,255,0.35)"
-        fontSize={8}
-        fontFamily="JetBrains Mono, monospace"
-        fontStyle="italic"
-      >
-        Tilted view · rings foreshortened to scale
-      </text>
+      {!phenomenaOnly && (
+        <text
+          x={12}
+          y={H - 10}
+          fill="rgba(255,255,255,0.35)"
+          fontSize={8}
+          fontFamily="JetBrains Mono, monospace"
+          fontStyle="italic"
+        >
+          Tilted view · rings foreshortened to scale
+        </text>
+      )}
     </g>
   );
 }
