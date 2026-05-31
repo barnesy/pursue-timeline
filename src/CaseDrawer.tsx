@@ -83,7 +83,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
             {kase.subtype && (
               <Chip
                 size="small"
-                label={kase.subtype.toLowerCase()}
+                label={kase.subtype.toLowerCase().replace(/_/g, " ")}
                 sx={{
                   bgcolor: "rgba(255,255,255,0.04)",
                   color: "text.secondary",

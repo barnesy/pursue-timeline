@@ -218,6 +218,42 @@ function altitudeBucketKeyFor(typeStr: string, altM: number | undefined): string
   return ALTITUDE_BUCKETS.find((b) => b.matchCase(typeStr || "", altM))?.key ?? null;
 }
 
+// CIA Stargate (337 docs) is heavily skewed toward routine process paper, so a
+// "Topic" row sorts each doc into one of three significance tiers to let a
+// reader cut to the substance:
+//   • psi      — reports of actual psychic phenomena (remote viewing, telepathy,
+//                psychokinesis, precognition): the headline material
+//   • research — substantive experiments, papers and analysis that aren't a
+//                named-phenomenon session
+//   • admin    — correspondence, funding, security, routing: process paper
+// Runtime heuristic (like deviceBucketKey): the data's own `subtype` is
+// authoritative for the explicit psi/admin types, and the synopsis text
+// disambiguates the large generic experiment/research buckets.
+type StargateTopic = { key: string; label: string; color: string };
+const STARGATE_TOPICS: StargateTopic[] = [
+  { key: "psi",      label: "Psi phenomena",          color: "#c084fc" },
+  { key: "research", label: "Experiments & research", color: "#5fc3b5" },
+  { key: "admin",    label: "Administrative",         color: "#7a8595" },
+];
+const STARGATE_TOPIC_KEYS_ALL = STARGATE_TOPICS.map((b) => b.key);
+const STARGATE_PSI_SUBTYPES = new Set([
+  "remote_viewing",
+  "telepathy",
+  "psychokinesis",
+  "precognition",
+]);
+const STARGATE_PSI_RE =
+  /remote[- ]view|clairvoyan|telepath|psychokine|precognit|out[- ]of[- ]body|\bESP\b|ganzfeld|premonition/i;
+
+function stargateTopicKey(c: Case): string | null {
+  if (c.dataset !== "stargate") return null;
+  const st = (c.subtype || "").toLowerCase();
+  if (st === "administrative" || st === "correspondence") return "admin";
+  if (STARGATE_PSI_SUBTYPES.has(st)) return "psi";
+  if (STARGATE_PSI_RE.test(c.description || "")) return "psi";
+  return "research";
+}
+
 const DATASET_SOURCES: DatasetSource[] = [
   { id: "uap", url: "cases.json" },
   { id: "uap-catalog", url: "uap-catalog.json" },
@@ -244,6 +280,9 @@ export function App() {
   );
   const [activeDeviceBuckets, setActiveDeviceBuckets] = useState<Set<string>>(
     new Set(DEVICE_BUCKET_KEYS_ALL),
+  );
+  const [activeStargateTopics, setActiveStargateTopics] = useState<Set<string>>(
+    new Set(STARGATE_TOPIC_KEYS_ALL),
   );
   const [selected, setSelected] = useState<Case | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -334,12 +373,15 @@ export function App() {
               // (UNDERGROUND SHAFT, BROKEN ARROW, etc.) into the catch-all
               // "PDF" so the MEDIA filter row stays focused on the 4 primary
               // media types. The original type is preserved as `subtype`
-              // and surfaced in the detail panel.
+              // and surfaced in the detail panel — unless the record already
+              // carries its own `subtype` (Stargate, nuclear-physics, uap-
+              // catalog ship a meaningful category there), which we keep so it
+              // isn't clobbered by the otherwise-redundant "PDF" type.
               if (src.id !== "uap") {
                 return {
                   ...c,
                   dataset: src.id,
-                  subtype: c.type,
+                  subtype: c.subtype ?? c.type,
                   type: "PDF",
                 };
               }
@@ -451,8 +493,21 @@ export function App() {
     return m;
   }, [cases]);
 
+  const stargateTopicCounts = useMemo(() => {
+    const m = new Map<string, number>();
+    if (!cases) return m;
+    for (const c of cases) {
+      if (c.dataset !== "stargate") continue;
+      const k = stargateTopicKey(c);
+      if (k) m.set(k, (m.get(k) || 0) + 1);
+    }
+    return m;
+  }, [cases]);
+
   // The yield/altitude rows only make sense when nuclear-test data is on.
   const showNuclearFilters = activeDatasets.has("nuclear-test");
+  // The topic row only makes sense when Stargate data is on.
+  const showStargateFilters = activeDatasets.has("stargate");
 
   // A compact one-line summary of active filters, shown next to the title
   // when the filter panel is collapsed so the user can see what's on without
@@ -477,8 +532,11 @@ export function App() {
     if (showNuclearFilters && activeDeviceBuckets.size < DEVICE_BUCKET_KEYS_ALL.length) {
       parts.push(`${activeDeviceBuckets.size}/${DEVICE_BUCKET_KEYS_ALL.length} device`);
     }
+    if (showStargateFilters && activeStargateTopics.size < STARGATE_TOPIC_KEYS_ALL.length) {
+      parts.push(`${activeStargateTopics.size}/${STARGATE_TOPIC_KEYS_ALL.length} topics`);
+    }
     return parts.join(" · ");
-  }, [cases, debouncedSearch, activeDatasets, activeAgencies, activeYieldBuckets, activeAltitudeBuckets, activeDeviceBuckets, showNuclearFilters]);
+  }, [cases, debouncedSearch, activeDatasets, activeAgencies, activeYieldBuckets, activeAltitudeBuckets, activeDeviceBuckets, activeStargateTopics, showNuclearFilters, showStargateFilters]);
 
   const types = useMemo(() => {
     if (!cases) return [];
@@ -522,9 +580,13 @@ export function App() {
           return false;
         }
       }
+      if (c.dataset === "stargate") {
+        const k = stargateTopicKey(c);
+        if (k && !activeStargateTopics.has(k)) return false;
+      }
       return true;
     });
-  }, [cases, activeDatasets, activeAgencies, activeTypes, activeYieldBuckets, activeAltitudeBuckets, activeDeviceBuckets]);
+  }, [cases, activeDatasets, activeAgencies, activeTypes, activeYieldBuckets, activeAltitudeBuckets, activeDeviceBuckets, activeStargateTopics]);
 
   // Step 2: apply plain-text search across title, description, agency,
   // location, subtype, and id. Case-insensitive substring match — splits the
@@ -617,6 +679,15 @@ export function App() {
 
   const toggleDeviceBucket = (key: string) => {
     setActiveDeviceBuckets((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleStargateTopic = (key: string) => {
+    setActiveStargateTopics((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -994,6 +1065,18 @@ export function App() {
                 onClick: () => toggleDeviceBucket(UNKNOWN_DEVICE_KEY),
               },
             ]}
+          />
+        )}
+        {showStargateFilters && (
+          <FilterRow
+            label="Topic"
+            items={STARGATE_TOPICS.map((b) => ({
+              key: b.key,
+              label: `${b.label} · ${(stargateTopicCounts.get(b.key) || 0).toLocaleString()}`,
+              color: b.color,
+              active: activeStargateTopics.has(b.key),
+              onClick: () => toggleStargateTopic(b.key),
+            }))}
           />
         )}
           </Box>
