@@ -1,0 +1,241 @@
+[
+  {
+    "url": "https://www.war.gov/ufo/?releaseDate=Release+02",
+    "method": "GET",
+    "resourceType": "document",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "size": 178875
+  },
+  {
+    "url": "https://www.war.gov/Resources/libraries/jQuery-Migrate/03_04_01/jquery-migrate.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 13579
+  },
+  {
+    "url": "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap",
+    "method": "GET",
+    "resourceType": "stylesheet",
+    "status": 200,
+    "contentType": "text/css; charset=utf-8",
+    "size": 1236
+  },
+  {
+    "url": "https://www.war.gov/Resources/libraries/jQuery-UI/01_13_03/jquery-ui.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 254968
+  },
+  {
+    "url": "https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Oswald:wght@200..700&display=swap",
+    "method": "GET",
+    "resourceType": "stylesheet",
+    "status": 200,
+    "contentType": "text/css; charset=utf-8",
+    "size": 8642
+  },
+  {
+    "url": "https://www.war.gov/Resources/libraries/jQuery/03_07_01/jquery.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 87535
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/Plugins/GoogleAnalytics/Universal-Federated-Analytics-8.7.js?agency=DOD&subagency=DMA&sitetopic=dma.web&dclink=true&pga4=G-SB6KFHKWNW",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 67737
+  },
+  {
+    "url": "https://www.war.gov/ScriptResource.axd?d=dwY9oWetJoJ4ZjA-1jPcEhP7ER5pj7vUnbl87xIrp5KgCIH7OinCkP3cK37LGan3ayBW32yRZSEgGl2tgZv50n3b6-V5-8OCkx2VKFRvNoTMy9OkcSdmsXHaJpvqsXD5HuMXQgmzxnfjN1aI0&t=32e5dfca",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 40326
+  },
+  {
+    "url": "https://www.war.gov/Portals/_default/Skins/DGOV2/resources/js/menu.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 19803
+  },
+  {
+    "url": "https://www.war.gov/js/dnn.modalpopup.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 7581
+  },
+  {
+    "url": "https://www.war.gov/js/dnncore.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 8437
+  },
+  {
+    "url": "https://www.war.gov/ScriptResource.axd?d=NJmAwtEo3IqOv4sUh-Rig0r8ribOsOru6PRUuOPeOUTxaLr0LkqwjUZ1KfN2pxsTzXrhnEn2qPqMmFHAgZnpJORcEUNLaSpc226qJmze-FYKMecKHwPV-k73fvQH1Ku4KKXAUA2&t=32e5dfca",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 102801
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/Plugins/Mobile-Detect/mobile-detect.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 38438
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/ValidatedPlugins/moment/moment.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 174604
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/ValidatedPlugins/vue/vue.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 94151
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/ValidatedPlugins/vue-resource/vue-resource.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 15067
+  },
+  {
+    "url": "https://www.war.gov/DesktopModules/MVC/DVIDSLiveEvents2/Resources/js/dvids-dle-api.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 27564
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/javascript; charset=utf-8",
+    "size": 42863
+  },
+  {
+    "url": "https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "text/javascript; charset=utf-8",
+    "size": 87276
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/Plugins/Skin/js/common.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 33904
+  },
+  {
+    "url": "https://www.war.gov/WebResource.axd?d=pynGkmcFUV16vn23mRKJ3YfxgZO6Vg-qfn4DLZzvdN4FsDO3JF6o8Ai9U2w1&t=638901627720898773",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 23063
+  },
+  {
+    "url": "https://www.war.gov/Portals/_default/Skins/DGOV2/resources/js/skin.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 2799
+  },
+  {
+    "url": "https://api.dvidshub.net/live/list?include_snippets=0&max_results=50&api_key=key-68bb60d16b35e&hashtag=dgovlive&sortdir=asc",
+    "method": "GET",
+    "resourceType": "fetch",
+    "status": 200,
+    "contentType": "application/json",
+    "size": 57
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/Plugins/DVIDSAnalytics/DVIDSVideoAnalytics.min.js?cdv=2020",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 6595
+  },
+  {
+    "url": "https://www.war.gov/DesktopModules/DVIDSVideoPlayer/Components/analyticsParamsForDVIDSAnalyticsAPI.js",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 911
+  },
+  {
+    "url": "https://analytics.google.com/g/collect?v=2&tid=G-SB6KFHKWNW&gtm=45je65r0v9185119203za200zb9131934939zd9131934939&_p=1779993781620&_gaz=1&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1911643458&_eu=AAAAAGA&are=1&cid=2059115014.1779993782&ec_mode=a&frm=0&pscdl=noapi&rcb=0&sr=1440x900&uaa=x86&uab=64&uafvl=Chromium%3B148.0.7778.179%7CGoogle%2520Chrome%3B148.0.7778.179%7CNot%252FA)Brand%3B99.0.0.0&uam=&uamb=0&uap=macOS&uapv=10_15_7&uaw=0&ul=en-us&gaf=2&_s=1&tag_exp=0~115938465~115938468&dl=https%3A%2F%2Fwar.gov%2Fufo%2F&dt=Presidential%20Unsealing%20and%20Reporting%20System%20for%20UAP%20Encounters%20%7C%20U.S.%20Department%20of%20War&dr=&sid=1779993782&sct=1&seg=0&_tu=wA&en=page_view&_fv=1&_ss=1&_ee=1&tfd=808",
+    "method": "POST",
+    "resourceType": "fetch",
+    "status": 204,
+    "contentType": "text/plain"
+  },
+  {
+    "url": "https://www.war.gov/desktopmodules/sharedlibrary/validatedplugins/hls.js/hls.js",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 1131818
+  },
+  {
+    "url": "https://www.war.gov/DesktopModules/SharedLibrary/ValidatedPlugins/dompurify//purify.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 22216
+  },
+  {
+    "url": "https://www.war.gov/Desktopmodules/SharedLibrary/Plugins/Bootstrap/js/bootstrap.min.js?cdv=2055",
+    "method": "GET",
+    "resourceType": "script",
+    "status": 200,
+    "contentType": "application/x-javascript",
+    "size": 39685
+  },
+  {
+    "url": "https://www.war.gov/Portals/1/Interactive/2026/UFO/uap-data.csv",
+    "method": "GET",
+    "resourceType": "fetch",
+    "status": 200,
+    "contentType": "application/octet-stream",
+    "size": 298415
+  }
+]
