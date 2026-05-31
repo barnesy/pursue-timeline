@@ -1782,6 +1782,17 @@ const T_FLASH_DIM = 0.14;       // Teller-Ulam dim (opaque-shell phase)
 const T_FLASH_SECOND = 0.32;    // second-flash peak (fireball "wins")
 const T_FLASH_END = 0.45;       // flash fully dissipated; fireball remains
 const T_FIREBALL_PEAK = 0.5;    // fireball fully expanded by this time
+
+// White detonation-flash opacity (Teller-Ulam double flash). Shared by the
+// bounded side-view rect and BlastMap3D's full-bleed map flash so both follow
+// the exact same timing/intensity curve. Returns 0 outside the flash window.
+export function detonationFlashOpacity(time: number): number {
+  if (time < 0 || time >= T_FLASH_END) return 0;
+  return time < T_FLASH_DIM
+    ? 0.85 * (1 - progress(time, 0, T_FLASH_DIM))
+    : 0.45 * easeOutQuad(progress(time, T_FLASH_DIM, T_FLASH_SECOND)) *
+        (1 - progress(time, T_FLASH_SECOND, T_FLASH_END));
+}
 const T_SHOCKWAVE_START = 0.4;  // shockwave separates from fireball
 const T_SHOCKWAVE_END = 5.0;    // shockwave reaches its full peak radius
 const T_WILSON_START = 0.5;     // condensation cloud forms
@@ -3948,20 +3959,18 @@ export function TiltedView({
         );
       })()}
 
-      {/* DETONATION FLASH — same Teller-Ulam double flash as side view */}
-      {bombActive && time < T_FLASH_END && fireballM > 0 && (
+      {/* DETONATION FLASH — same Teller-Ulam double flash as side view.
+          Skipped in phenomenaOnly mode: a bounded white rect would reveal the
+          scene's rectangular edges over a map; BlastMap3D draws a full-bleed
+          white flash (same detonationFlashOpacity curve) instead. */}
+      {!phenomenaOnly && bombActive && time < T_FLASH_END && fireballM > 0 && (
         <rect
           x={0}
           y={0}
           width={W}
           height={H}
           fill="#ffffff"
-          opacity={
-            time < T_FLASH_DIM
-              ? 0.85 * (1 - progress(time, 0, T_FLASH_DIM))
-              : 0.45 * easeOutQuad(progress(time, T_FLASH_DIM, T_FLASH_SECOND)) *
-                  (1 - progress(time, T_FLASH_SECOND, T_FLASH_END))
-          }
+          opacity={detonationFlashOpacity(time)}
           pointerEvents="none"
         />
       )}

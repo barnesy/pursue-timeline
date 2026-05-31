@@ -40,6 +40,7 @@ import {
   TILT_HORIZON_Y,
   TILT_RATIO,
   fireballLuminosity,
+  detonationFlashOpacity,
 } from "./BlastDiagram";
 import type { DetonationEnv, UnitSystem } from "./blastPhysics";
 
@@ -378,13 +379,30 @@ export function BlastMap3D({
   // (no bounded rectangle), centered roughly on ground zero near the bottom-
   // middle of the framing.
   const lum = detT > 0 ? fireballLuminosity(detT) : 0;
+  // White Teller-Ulam double flash — same curve as the side view's bounded
+  // rect, but painted full-bleed so it never reveals the scene's edges.
+  const flashWhite = detT > 0 ? detonationFlashOpacity(detT) : 0;
 
   return (
     <Box sx={{ position: "relative", width: "100%", height: "100%", minHeight: 360 }}>
       <div ref={containerRef} style={{ width: "100%", height: "100%", borderRadius: 4 }} />
 
       {/* Full-bleed detonation flash — covers the entire map edge-to-edge so
-          the flash never reveals the animation's rectangular bounds. */}
+          the flash never reveals the animation's rectangular bounds. The white
+          flash is a uniform full-container wash (no shape, so no visible edge);
+          the warm radial adds the fireball's glow on top. */}
+      {flashWhite > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 1,
+            background: "#ffffff",
+            opacity: flashWhite,
+          }}
+        />
+      )}
       {lum > 0.02 && (
         <div
           style={{
