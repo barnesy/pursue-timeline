@@ -15,6 +15,7 @@ import type { Case } from "./types";
 import { AGENCY_COLORS, AGENCY_SHORT, TYPE_COLORS, TYPE_LABELS } from "./theme";
 import { DATASETS } from "./datasets";
 import { findNearby, formatDaysDelta } from "./proximity";
+import { isTrackedPublication, findReferencingDocs, findReferencedPublications } from "./publications";
 import { fmtDistance, type UnitSystem } from "./blastPhysics";
 import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
@@ -40,6 +41,15 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
     [kase, allCases],
   );
   const units = useUnits();
+  // Published-work ↔ document citation cross-references (the "call out").
+  const referencingDocs = useMemo(
+    () => (isTrackedPublication(kase.id) ? findReferencingDocs(kase.id, allCases) : []),
+    [kase.id, allCases],
+  );
+  const referencedPubs = useMemo(
+    () => findReferencedPublications(kase, allCases),
+    [kase, allCases],
+  );
   return (
     <Box
       sx={{
@@ -271,6 +281,91 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse }: Pro
                       </Button>
                     );
                   })}
+                </Stack>
+              </Box>
+            </>
+          )}
+
+          {/* Citations — STARGATE documents that reference this published work */}
+          {referencingDocs.length > 0 && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                  <HubIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                  >
+                    Referenced in {referencingDocs.length} declassified file{referencingDocs.length === 1 ? "" : "s"}
+                  </Typography>
+                </Stack>
+                <Stack spacing={0.5}>
+                  {referencingDocs.map((d) => (
+                    <Button
+                      key={d.id}
+                      variant="text"
+                      onClick={() => onSelect(d)}
+                      sx={{
+                        justifyContent: "flex-start",
+                        textAlign: "left",
+                        px: 1,
+                        py: 0.75,
+                        textTransform: "none",
+                        color: "text.primary",
+                        "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontFamily: "JetBrains Mono, monospace" }}
+                        >
+                          {DATASETS[d.dataset]?.shortName || d.dataset}
+                          {d.incidentDateRaw ? ` · ${d.incidentDateRaw}` : ""}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3 }}>
+                          {d.title.length > 90 ? d.title.slice(0, 90) + "…" : d.title}
+                        </Typography>
+                      </Box>
+                    </Button>
+                  ))}
+                </Stack>
+              </Box>
+            </>
+          )}
+
+          {/* Reciprocal — published works this document appears to cite */}
+          {referencedPubs.length > 0 && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
+                >
+                  References published work{referencedPubs.length === 1 ? "" : "s"}
+                </Typography>
+                <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
+                  {referencedPubs.map((p) => (
+                    <Chip
+                      key={p.id}
+                      size="small"
+                      label={p.title.length > 48 ? p.title.slice(0, 48) + "…" : p.title}
+                      onClick={() => onSelect(p)}
+                      sx={{
+                        bgcolor: "rgba(52,211,153,0.12)",
+                        color: "#6ee7b7",
+                        border: "1px solid rgba(52,211,153,0.4)",
+                        cursor: "pointer",
+                        maxWidth: "100%",
+                        "&:hover": { bgcolor: "rgba(52,211,153,0.2)" },
+                      }}
+                    />
+                  ))}
                 </Stack>
               </Box>
             </>

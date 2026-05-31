@@ -74,6 +74,15 @@ const PUB_SOURCE: Record<string, string> = {
   // Free full-text scan (Internet Archive) — preferred over a storefront link.
   "UFOlogy: A Major Breakthrough in the Scientific Understanding of Unidentified Flying Objects":
     "https://archive.org/details/ufology0000mcca",
+  // Psi-research works actually referenced across the CIA STARGATE files.
+  "Information Transmission Under Conditions of Sensory Shielding":
+    "https://www.nature.com/articles/251602a0",
+  "A Perceptual Channel for Information Transfer over Kilometer Distances":
+    "https://doi.org/10.1109/PROC.1976.10113",
+  "Psychic Discoveries Behind the Iron Curtain": "https://openlibrary.org/works/OL2174737W",
+  "Extra-Sensory Perception": "https://en.wikipedia.org/wiki/Extrasensory_Perception_(book)",
+  "Mental Radio": "https://en.wikipedia.org/wiki/Mental_Radio",
+  "Mind-Reach: Scientists Look at Psychic Ability": "https://en.wikipedia.org/wiki/Russell_Targ",
 };
 
 const s = (v: unknown) => (v == null ? "" : String(v).trim());
