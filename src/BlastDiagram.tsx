@@ -7,7 +7,7 @@
 //   4. A legend table mapping ring colors to damage levels with absolute radii
 //   5. Footnote with a familiar-size comparison for the largest ring
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -36,7 +36,14 @@ import {
 } from "./blastPhysics";
 import { useAnimationFrame, prefersReducedMotion } from "./useAnimationFrame";
 import { LocationMap, type BlastRing } from "./LocationMap";
-import { BlastMap3D } from "./BlastMap3D";
+// Lazy-loaded: pulls maplibre-gl (the heaviest dependency) into its own chunk
+// so it only downloads when the user actually opens the 3D map.
+const BlastMap3D = lazy(() => import("./BlastMap3D").then((m) => ({ default: m.BlastMap3D })));
+const Map3DFallback = (
+  <Box sx={{ height: "100%", minHeight: 320, display: "grid", placeItems: "center", color: "text.secondary", fontSize: 13 }}>
+    Loading 3D map…
+  </Box>
+);
 import TerrainIcon from "@mui/icons-material/Terrain";
 
 type Props = { kase: Case };
@@ -1084,22 +1091,24 @@ export function BlastDiagram({ kase }: Props) {
           )}
           {geo.status === "granted" && geo.coords && (
             <Box sx={{ width: "100%", aspectRatio: `${TILT_W} / ${TILT_H}`, minHeight: 360, maxHeight: "70vh" }}>
-              <BlastMap3D
-                lat={geo.coords.lat}
-                lng={geo.coords.lng}
-                env={env}
-                hobM={env === "atmospheric" || env === "rocket" ? effects.optimalHobM : 0}
-                fireballM={effects.fireballM}
-                shockwavePeakM={effects.lightBlastM}
-                hoveredRingKey={hoveredRingKey}
-                units={units}
-                damageRings={activeRings.map((d) => ({
-                  key: d.key,
-                  label: d.label,
-                  radiusM: ringSet[d.key],
-                  color: RING_COLORS[d.key],
-                }))}
-              />
+              <Suspense fallback={Map3DFallback}>
+                <BlastMap3D
+                  lat={geo.coords.lat}
+                  lng={geo.coords.lng}
+                  env={env}
+                  hobM={env === "atmospheric" || env === "rocket" ? effects.optimalHobM : 0}
+                  fireballM={effects.fireballM}
+                  shockwavePeakM={effects.lightBlastM}
+                  hoveredRingKey={hoveredRingKey}
+                  units={units}
+                  damageRings={activeRings.map((d) => ({
+                    key: d.key,
+                    label: d.label,
+                    radiusM: ringSet[d.key],
+                    color: RING_COLORS[d.key],
+                  }))}
+                />
+              </Suspense>
             </Box>
           )}
         </Box>
@@ -1355,22 +1364,24 @@ export function BlastDiagram({ kase }: Props) {
               the tilted SVG animation (with a prompt to enable location). */}
           <Box sx={{ flex: { xs: "1 1 60%", md: "1 1 70%" }, minHeight: 0, position: "relative" }}>
             {mapModalOpen && geo.status === "granted" && geo.coords ? (
-              <BlastMap3D
-                lat={geo.coords.lat}
-                lng={geo.coords.lng}
-                env={env}
-                hobM={env === "atmospheric" || env === "rocket" ? effects.optimalHobM : 0}
-                fireballM={effects.fireballM}
-                shockwavePeakM={effects.lightBlastM}
-                hoveredRingKey={hoveredRingKey}
-                units={units}
-                damageRings={activeRings.map((d) => ({
-                  key: d.key,
-                  label: d.label,
-                  radiusM: ringSet[d.key],
-                  color: RING_COLORS[d.key],
-                }))}
-              />
+              <Suspense fallback={Map3DFallback}>
+                <BlastMap3D
+                  lat={geo.coords.lat}
+                  lng={geo.coords.lng}
+                  env={env}
+                  hobM={env === "atmospheric" || env === "rocket" ? effects.optimalHobM : 0}
+                  fireballM={effects.fireballM}
+                  shockwavePeakM={effects.lightBlastM}
+                  hoveredRingKey={hoveredRingKey}
+                  units={units}
+                  damageRings={activeRings.map((d) => ({
+                    key: d.key,
+                    label: d.label,
+                    radiusM: ringSet[d.key],
+                    color: RING_COLORS[d.key],
+                  }))}
+                />
+              </Suspense>
             ) : (
               // No location yet — show the tilted SVG animation, and offer to
               // enable location so the view can go 3D over the real map.
