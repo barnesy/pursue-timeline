@@ -15,11 +15,13 @@
     "sync-data": "cp data/cases.json public/cases.json && cp data/nuclear-tests.json public/nuclear-tests.json && cp data/nuclear-incidents.json public/nuclear-incidents.json && cp data/stargate.json public/stargate.json && cp data/uap-catalog.json public/uap-catalog.json && cp data/nuclear-physics.json public/nuclear-physics.json && cp data/publications.json public/publications.json",
     "dev": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && npm run build-search-index && vite",
     "build": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && npm run build-search-index && tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mcp": "tsx mcp/server.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
     "@turf/circle": "^7.3.5",
