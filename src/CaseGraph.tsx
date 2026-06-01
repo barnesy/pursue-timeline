@@ -58,8 +58,11 @@ function layout(nodes: Node[], edges: [number, number][]): void {
       nd.x += Math.max(-10, Math.min(10, nd.vx)) * cool;
       nd.y += Math.max(-10, Math.min(10, nd.vy)) * cool;
       nd.vx *= 0.86; nd.vy *= 0.86;
-      nd.x = Math.max(16, Math.min(W - 16, nd.x));
-      nd.y = Math.max(16, Math.min(H - 16, nd.y));
+      nd.x = Math.max(18, Math.min(W - 18, nd.x));
+      // Entity nodes carry a label above them — keep extra top margin so it
+      // never clips the frame.
+      const topPad = nd.kind === "case" ? 16 : 26;
+      nd.y = Math.max(topPad, Math.min(H - 16, nd.y));
     }
   }
 }
@@ -115,7 +118,9 @@ export function CaseGraph({
         {edges.map(([s, t], i) => (
           <line key={i} x1={nodes[s].x} y1={nodes[s].y} x2={nodes[t].x} y2={nodes[t].y} stroke="rgba(255,255,255,0.16)" strokeWidth={1} />
         ))}
-        {nodes.map((nd) =>
+        {/* Entity nodes first, then case nodes on top, so numbered case dots
+            never hide behind an entity's label backing. */}
+        {[...nodes].sort((a, b) => (a.kind === "case" ? 1 : 0) - (b.kind === "case" ? 1 : 0)).map((nd) =>
           nd.kind === "case" ? (
             <g key={nd.id} style={{ cursor: "pointer" }} onClick={() => nd.ci != null && byIdx.get(nd.ci) && onOpen(byIdx.get(nd.ci)!)}>
               <circle cx={nd.x} cy={nd.y} r={11} fill={nd.color} stroke="#0a0d12" strokeWidth={1.5} />
@@ -128,15 +133,23 @@ export function CaseGraph({
               <circle cx={nd.x} cy={nd.y} r={6} fill={nd.color} fillOpacity={0.5} stroke={nd.color} strokeWidth={1.5} />
               {(() => {
                 // Anchor labels so they never clip the viewBox edges: beside
-                // the node near the left/right margins, above it otherwise.
-                const left = nd.x < W * 0.3, right = nd.x > W * 0.7;
+                // the node near the left/right margins, above it otherwise. A
+                // dark backing rect keeps the label readable over edges and
+                // when entity labels crowd together.
+                const left = nd.x < W * 0.28, right = nd.x > W * 0.72;
                 const anchor = left ? "start" : right ? "end" : "middle";
                 const lx = left ? nd.x + 9 : right ? nd.x - 9 : nd.x;
-                const ly = left || right ? nd.y + 3 : nd.y - 9;
+                const ly = left || right ? nd.y + 3 : nd.y - 10;
+                const text = nd.label.length > 16 ? nd.label.slice(0, 16) + "…" : nd.label;
+                const w = text.length * 5.2 + 6;
+                const rx = anchor === "start" ? lx - 3 : anchor === "end" ? lx - w + 3 : lx - w / 2;
                 return (
-                  <text x={lx} y={ly} textAnchor={anchor} fill={nd.color} fontSize={9} fontWeight={600} pointerEvents="none">
-                    {nd.label.length > 16 ? nd.label.slice(0, 16) + "…" : nd.label}
-                  </text>
+                  <>
+                    <rect x={rx} y={ly - 8} width={w} height={11} rx={2} fill="#0d1117" fillOpacity={0.78} />
+                    <text x={lx} y={ly} textAnchor={anchor} fill={nd.color} fontSize={9} fontWeight={600} pointerEvents="none">
+                      {text}
+                    </text>
+                  </>
                 );
               })()}
             </g>
