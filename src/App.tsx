@@ -47,6 +47,7 @@ import { buildEntityIndex } from "./entities";
 import { EntityPanel } from "./EntityPanel";
 import { getLatLng } from "./proximity";
 import { loadCorpusStats, type CorpusStats } from "./corpusStats";
+import { loadSearch, rankedIds } from "./search";
 import {
   DATASETS,
   DATASET_IDS,
@@ -282,6 +283,9 @@ export function App() {
   useEffect(() => {
     loadCorpusStats(import.meta.env.BASE_URL).then(setCorpusStats);
   }, []);
+  // Lazy-load the MiniSearch index on first keystroke; a bump re-runs the
+  // search memo once it's ready so ranked results replace the substring fallback.
+  const [searchReadyTick, setSearchReadyTick] = useState(0);
   const [casesOpen, setCasesOpen] = useState(false);
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
@@ -338,6 +342,14 @@ export function App() {
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(searchTerm.trim().toLowerCase()), 200);
     return () => clearTimeout(id);
+  }, [searchTerm]);
+
+  // First time the user searches, lazily fetch the MiniSearch index; bump a
+  // tick when it lands so the search memo recomputes with ranked results.
+  useEffect(() => {
+    if (searchTerm.trim().length >= 2) {
+      loadSearch(import.meta.env.BASE_URL).then((m) => { if (m) setSearchReadyTick((t) => t + 1); });
+    }
   }, [searchTerm]);
 
   // Keyboard shortcuts: "/" focuses search, "Esc" clears it or closes the
@@ -632,6 +644,19 @@ export function App() {
     if (!debouncedSearch) return filtered;
     const tokens = debouncedSearch.split(/\s+/).filter(Boolean);
     if (tokens.length === 0) return filtered;
+
+    // Preferred path: MiniSearch ranked ids (field-boosted, prefix, fuzzy),
+    // intersected with the active filter set and returned in relevance order.
+    const ranked = rankedIds(debouncedSearch);
+    if (ranked.length) {
+      const allowed = new Set(filtered.map((c) => c.id));
+      const byId = new Map(filtered.map((c) => [c.id, c]));
+      const out: Case[] = [];
+      for (const id of ranked) if (allowed.has(id)) out.push(byId.get(id)!);
+      return out;
+    }
+
+    // Fallback (index not loaded yet, or zero ranked hits): substring match.
     return filtered.filter((c) => {
       const hay = [
         c.title,
@@ -649,7 +674,8 @@ export function App() {
         .toLowerCase();
       return tokens.every((t) => hay.includes(t));
     });
-  }, [filtered, debouncedSearch]);
+    // searchReadyTick forces recompute once the index finishes loading.
+  }, [filtered, debouncedSearch, searchReadyTick]);
 
   // Step 3: apply date-range filter (from the timeline brush). When active,
   // undated cases drop out of every view since we can't verify they fit.

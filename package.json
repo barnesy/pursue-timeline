@@ -11,9 +11,10 @@
     "build-nuclear-physics": "tsx scripts/build-nuclear-physics.ts",
     "build-stargate-people": "node scripts/build-stargate-people.mjs",
     "build-corpus-stats": "tsx scripts/build-corpus-stats.ts",
+    "build-search-index": "tsx scripts/build-search-index.ts",
     "sync-data": "cp data/cases.json public/cases.json && cp data/nuclear-tests.json public/nuclear-tests.json && cp data/nuclear-incidents.json public/nuclear-incidents.json && cp data/stargate.json public/stargate.json && cp data/uap-catalog.json public/uap-catalog.json && cp data/nuclear-physics.json public/nuclear-physics.json && cp data/publications.json public/publications.json",
-    "dev": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && vite",
-    "build": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && tsc -b && vite build",
+    "dev": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && npm run build-search-index && vite",
+    "build": "npm run sync-data && npm run build-stargate-people && npm run build-corpus-stats && npm run build-search-index && tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "d3-zoom": "^3.0.0",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^5.24.0",
+    "minisearch": "^7.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1",
