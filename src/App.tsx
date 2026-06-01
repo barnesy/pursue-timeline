@@ -40,6 +40,7 @@ import { MapView } from "./MapView";
 import { CasePanel } from "./CaseDrawer";
 import { HotspotsPanel } from "./HotspotsPanel";
 import { CasesOverlay } from "./CasesOverlay";
+import { ConnectionsExplorer } from "./ConnectionsExplorer";
 import { useCaseIds } from "./collection";
 import { useUnits, unitsStore } from "./units";
 import { buildEntityIndex } from "./entities";
@@ -282,6 +283,7 @@ export function App() {
     loadCorpusStats(import.meta.env.BASE_URL).then(setCorpusStats);
   }, []);
   const [casesOpen, setCasesOpen] = useState(false);
+  const [connectionsOpen, setConnectionsOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
   const [activeDatasets, setActiveDatasets] = useState<Set<DatasetId>>(
@@ -948,6 +950,15 @@ export function App() {
             <ToggleButton value="metric" aria-label="Metric units (m / km)">m</ToggleButton>
             <ToggleButton value="imperial" aria-label="Imperial units (ft / mi)">ft</ToggleButton>
           </ToggleButtonGroup>
+          <Button
+            size="small"
+            onClick={() => setConnectionsOpen(true)}
+            variant="outlined"
+            startIcon={<HubIcon fontSize="small" />}
+            sx={{ textTransform: "none", px: { xs: 1, md: 1.25 }, color: "text.secondary" }}
+          >
+            <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>Connections</Box>
+          </Button>
           <Badge
             badgeContent={caseIds.length}
             color="primary"
@@ -1300,6 +1311,16 @@ export function App() {
         onEntity={setFocusedEntityId}
         onSelect={(c) => {
           setCasesOpen(false);
+          setSelected(c);
+        }}
+      />
+      <ConnectionsExplorer
+        open={connectionsOpen}
+        onClose={() => setConnectionsOpen(false)}
+        allCases={cases ?? []}
+        corpusStats={corpusStats}
+        onSelect={(c) => {
+          setConnectionsOpen(false);
           setSelected(c);
         }}
       />
