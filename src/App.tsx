@@ -262,6 +262,7 @@ const DATASET_SOURCES: DatasetSource[] = [
   { id: "nuclear-incident", url: "nuclear-incidents.json" },
   { id: "nuclear-physics", url: "nuclear-physics.json" },
   { id: "stargate", url: "stargate.json" },
+  { id: "publication", url: "publications.json" },
 ];
 
 export function App() {

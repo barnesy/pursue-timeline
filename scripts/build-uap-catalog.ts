@@ -14,6 +14,7 @@ import { resolve } from "node:path";
 
 const RAW = resolve(import.meta.dirname, "..", "data", "raw", "uap-catalog-raw.json");
 const OUT = resolve(import.meta.dirname, "..", "data", "uap-catalog.json");
+const PUB_OUT = resolve(import.meta.dirname, "..", "data", "publications.json");
 
 type Case = {
   dataset: string;
@@ -126,6 +127,9 @@ async function main() {
   };
 
   const cases: Case[] = [];
+  // Published works live in their own dataset ("publication") so they get their
+  // own timeline lane instead of being mislabeled under "UAP Catalog".
+  const pubs: Case[] = [];
 
   // 1) Scored case catalog ---------------------------------------------------
   let unmatched = 0;
@@ -223,9 +227,9 @@ async function main() {
     const title = s(r["Title"]);
     if (!title) continue;
     const y = firstYear(r["Year"]);
-    cases.push({
-      dataset: "uap-catalog",
-      id: `uc-pub-${s(r["#"]) || cases.length + 1}`,
+    pubs.push({
+      dataset: "publication",
+      id: `uc-pub-${s(r["#"]) || pubs.length + 1}`,
       title,
       agency: "Published work",
       incidentDate: isoFromYear(y),
@@ -248,6 +252,8 @@ async function main() {
   console.log(`[build] uap-catalog: ${cases.length} records (${withGeo} geolocated). ${unmatched} unmatched case locations.`);
   await writeFile(OUT, JSON.stringify(cases, null, 2));
   console.log(`[build] wrote ${OUT}`);
+  await writeFile(PUB_OUT, JSON.stringify(pubs, null, 2));
+  console.log(`[build] publications: ${pubs.length} records → wrote ${PUB_OUT}`);
 }
 
 main().catch((e) => {

@@ -9,7 +9,8 @@ export type DatasetId =
   | "nuclear-test"
   | "nuclear-incident"
   | "nuclear-physics"
-  | "stargate";
+  | "stargate"
+  | "publication";
 
 export type Dataset = {
   id: DatasetId;
@@ -88,6 +89,17 @@ export const DATASETS: Record<DatasetId, Dataset> = {
       "CIA remote-viewing program documents, declassified 1995. Timeline-only — most records have dates but no useful geographic data.",
     sourceLabel: "CIA FOIA Reading Room",
     sourceUrl: "https://www.cia.gov/readingroom/collection/stargate",
+  },
+  publication: {
+    id: "publication",
+    name: "Published Works & Reports",
+    shortName: "Published Works",
+    color: "#f4a261",
+    hasGeo: false,
+    description:
+      "Key books, papers, and official reports across the anomaly record — UFO literature, parapsychology research cited in the CIA STARGATE files, and government studies.",
+    sourceLabel: "Various",
+    sourceUrl: "",
   },
 };
 
