@@ -363,7 +363,7 @@ export function App() {
   }, [selected?.id]);
 
   useEffect(() => {
-    Promise.all(
+    const datasetsP = Promise.all(
       DATASET_SOURCES.map((src) =>
         fetch(`${import.meta.env.BASE_URL}${src.url}`)
           .then((r) => {
@@ -392,9 +392,20 @@ export function App() {
             }),
           ),
       ),
+    );
+    // Key-figure entity map for STARGATE docs (best-effort; absent → no chips).
+    const peopleP: Promise<Record<string, string[]>> = fetch(
+      `${import.meta.env.BASE_URL}stargate-people.json`,
     )
-      .then((perDataset) => {
-        const data: Case[] = perDataset.flat();
+      .then((r) => (r.ok ? r.json() : {}))
+      .catch(() => ({}));
+    Promise.all([datasetsP, peopleP])
+      .then(([perDataset, people]) => {
+        const data: Case[] = perDataset
+          .flat()
+          .map((c) =>
+            c.dataset === "stargate" && people[c.id] ? { ...c, people: people[c.id] } : c,
+          );
         setCases(data);
         setActiveAgencies(new Set(data.map((c) => c.agency).filter(Boolean)));
         setActiveTypes(new Set(data.map((c) => c.type).filter(Boolean)));
@@ -607,6 +618,9 @@ export function App() {
         c.subtype || "",
         c.type,
         c.id,
+        // Key figures (STARGATE) so a person chip in the detail panel finds
+        // every file that names them, even when the synopsis doesn't.
+        ...(c.people || []),
       ]
         .join("  ") // unlikely separator so words from different fields don't accidentally concatenate
         .toLowerCase();
@@ -1177,6 +1191,7 @@ export function App() {
                     onSelect={setSelected}
                     onClose={() => setSelected(null)}
                     onCollapse={() => detailPanelRef.current?.collapse()}
+                    onSearch={setSearchTerm}
                   />
                 </Panel>
               </>
@@ -1230,6 +1245,10 @@ export function App() {
                     setMobileDrawer(null);
                   }}
                   onCollapse={() => setMobileDrawer(null)}
+                  onSearch={(t) => {
+                    setSearchTerm(t);
+                    setMobileDrawer(null);
+                  }}
                 />
               )}
             </Drawer>

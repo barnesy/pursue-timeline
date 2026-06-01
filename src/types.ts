@@ -44,4 +44,7 @@ export type Case = {
   dvidsVideoId: string;
   imageUrl: string;
   imageAlt: string;
+  /** Key figures extracted from the source document's entity metadata
+   * (STARGATE only). Populated at load time from stargate-people.json. */
+  people?: string[];
 };

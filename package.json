@@ -9,9 +9,10 @@
     "inspect": "tsx scripts/inspect.ts",
     "build-uap-catalog": "tsx scripts/build-uap-catalog.ts",
     "build-nuclear-physics": "tsx scripts/build-nuclear-physics.ts",
+    "build-stargate-people": "node scripts/build-stargate-people.mjs",
     "sync-data": "cp data/cases.json public/cases.json && cp data/nuclear-tests.json public/nuclear-tests.json && cp data/nuclear-incidents.json public/nuclear-incidents.json && cp data/stargate.json public/stargate.json && cp data/uap-catalog.json public/uap-catalog.json && cp data/nuclear-physics.json public/nuclear-physics.json && cp data/publications.json public/publications.json",
-    "dev": "npm run sync-data && vite",
-    "build": "npm run sync-data && tsc -b && vite build",
+    "dev": "npm run sync-data && npm run build-stargate-people && vite",
+    "build": "npm run sync-data && npm run build-stargate-people && tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
