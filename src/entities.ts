@@ -9,8 +9,9 @@
 // prose-derived people are later layers that plug into the same registry.
 
 import type { Case } from "./types";
+import { placesFor } from "./places";
 
-export type EntityType = "person";
+export type EntityType = "person" | "place";
 
 export type Entity = {
   id: string;
@@ -61,16 +62,21 @@ export type EntityIndex = {
 export function buildEntityIndex(cases: Case[]): EntityIndex {
   const byId = new Map<string, Entity>();
   const caseEntityIds = new Map<string, string[]>();
+  const link = (id: string, type: EntityType, name: string, caseId: string, ids: string[]) => {
+    let e = byId.get(id);
+    if (!e) { e = { id, type, name, caseIds: [] }; byId.set(id, e); }
+    if (!e.caseIds.includes(caseId)) e.caseIds.push(caseId);
+    if (!ids.includes(id)) ids.push(id);
+  };
   for (const c of cases) {
     const ids: string[] = [];
     for (const raw of namesIn(c)) {
       const name = canon(raw);
       if (name.length < 3) continue;
-      const id = slug(name);
-      let e = byId.get(id);
-      if (!e) { e = { id, type: "person", name, caseIds: [] }; byId.set(id, e); }
-      if (!e.caseIds.includes(c.id)) e.caseIds.push(c.id);
-      if (!ids.includes(id)) ids.push(id);
+      link(slug(name), "person", name, c.id, ids);
+    }
+    for (const p of placesFor(c)) {
+      link(`place:${p.id}`, "place", p.name, c.id, ids);
     }
     if (ids.length) caseEntityIds.set(c.id, ids);
   }

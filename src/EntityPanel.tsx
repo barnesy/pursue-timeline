@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import type { Case } from "./types";
 import type { Entity } from "./entities";
 import { DATASETS, DATASET_IDS, type DatasetId } from "./datasets";
@@ -78,11 +79,15 @@ export function EntityPanel({
           borderBottom: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        <PersonOutlineIcon sx={{ color: "text.secondary" }} />
+        {entity.type === "place" ? (
+          <PlaceOutlinedIcon sx={{ color: "text.secondary" }} />
+        ) : (
+          <PersonOutlineIcon sx={{ color: "text.secondary" }} />
+        )}
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <Typography sx={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>{entity.name}</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace" }}>
-            person · referenced in {total} record{total === 1 ? "" : "s"} across {groups.length} dataset
+            {entity.type} · {total} record{total === 1 ? "" : "s"} across {groups.length} dataset
             {groups.length === 1 ? "" : "s"}
           </Typography>
         </Box>

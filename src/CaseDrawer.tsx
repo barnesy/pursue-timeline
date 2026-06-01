@@ -16,7 +16,7 @@ import { AGENCY_COLORS, AGENCY_SHORT, TYPE_COLORS, TYPE_LABELS } from "./theme";
 import { DATASETS } from "./datasets";
 import { findNearby, formatDaysDelta } from "./proximity";
 import { isTrackedPublication, findReferencingDocs, findReferencedPublications } from "./publications";
-import type { EntityIndex } from "./entities";
+import type { EntityIndex, Entity } from "./entities";
 import { fmtDistance, type UnitSystem } from "./blastPhysics";
 import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
@@ -57,6 +57,8 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
   );
   // People/authors this record connects to in the cross-dataset registry.
   const entities = entityIndex ? entityIndex.forCase(kase) : [];
+  const people = entities.filter((e) => e.type === "person");
+  const places = entities.filter((e) => e.type === "place");
   return (
     <Box
       sx={{
@@ -192,40 +194,29 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
             </>
           )}
 
-          {/* People — cross-dataset figures/authors; click opens the entity panel */}
-          {entities.length > 0 && onEntity && (
+          {/* Network connections — people/authors and places; click opens the
+              entity panel showing everywhere that entity appears. */}
+          {onEntity && (people.length > 0 || places.length > 0) && (
             <>
               <Divider sx={{ my: 1 }} />
-              <Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
-                >
-                  {kase.dataset === "publication" ? "Authors" : "Key figures"}
-                </Typography>
-                <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-                  {entities.map((e) => (
-                    <Chip
-                      key={e.id}
-                      size="small"
-                      label={e.caseIds.length > 1 ? `${e.name} · ${e.caseIds.length}` : e.name}
-                      onClick={() => onEntity(e.id)}
-                      sx={{
-                        bgcolor: "rgba(154,165,177,0.14)",
-                        color: "#cdd5df",
-                        border: "1px solid rgba(154,165,177,0.4)",
-                        cursor: "pointer",
-                        maxWidth: "100%",
-                        "&:hover": { bgcolor: "rgba(154,165,177,0.24)" },
-                      }}
-                    />
-                  ))}
-                </Stack>
-                <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.75 }}>
-                  Click a name to see everywhere they appear.
-                </Typography>
-              </Box>
+              {people.length > 0 && (
+                <Box sx={{ mb: places.length > 0 ? 1.25 : 0 }}>
+                  <EntityChipRow
+                    label={kase.dataset === "publication" ? "Authors" : "Key figures"}
+                    entities={people}
+                    onEntity={onEntity}
+                    color="154,165,177"
+                  />
+                </Box>
+              )}
+              {places.length > 0 && (
+                <Box>
+                  <EntityChipRow label="Places" entities={places} onEntity={onEntity} color="122,167,214" />
+                </Box>
+              )}
+              <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.75 }}>
+                Click to see everywhere it appears across the datasets.
+              </Typography>
             </>
           )}
 
@@ -464,6 +455,50 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
         )}
       </Box>
     </Box>
+  );
+}
+
+// A labeled row of clickable entity chips (people or places). `color` is an
+// "r,g,b" triplet so people and places read distinctly.
+function EntityChipRow({
+  label,
+  entities,
+  onEntity,
+  color,
+}: {
+  label: string;
+  entities: Entity[];
+  onEntity: (id: string) => void;
+  color: string;
+}) {
+  return (
+    <>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
+      >
+        {label}
+      </Typography>
+      <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
+        {entities.map((e) => (
+          <Chip
+            key={e.id}
+            size="small"
+            label={e.caseIds.length > 1 ? `${e.name} · ${e.caseIds.length}` : e.name}
+            onClick={() => onEntity(e.id)}
+            sx={{
+              bgcolor: `rgba(${color},0.14)`,
+              color: "#e6ecf2",
+              border: `1px solid rgba(${color},0.4)`,
+              cursor: "pointer",
+              maxWidth: "100%",
+              "&:hover": { bgcolor: `rgba(${color},0.24)` },
+            }}
+          />
+        ))}
+      </Stack>
+    </>
   );
 }
 
