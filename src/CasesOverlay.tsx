@@ -28,6 +28,7 @@ import { fmtDistance } from "./blastPhysics";
 import { useUnits } from "./units";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { casesStore, useCaseIds } from "./collection";
+import { CaseGraph } from "./CaseGraph";
 import type { EntityIndex, Entity } from "./entities";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
@@ -55,6 +56,7 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
   const units = useUnits();
   const [maxKm, setMaxKm] = useState(500);
   const [maxYears, setMaxYears] = useState(5);
+  const [leftView, setLeftView] = useState<"map" | "graph">("map");
 
   const byId = useMemo(() => new Map(allCases.map((c) => [c.id, c])), [allCases]);
   const cases = useMemo(
@@ -136,8 +138,37 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
           {/* LEFT rail — two-up vertical: map (top) + timeline (bottom) */}
           <Box sx={{ width: { xs: 240, md: 320 }, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.08)", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box sx={{ flex: "1 1 auto", minHeight: 180, display: "flex", flexDirection: "column", p: 1.5 }}>
-              <Label>MAP — fit to all · links = correlated pairs</Label>
-              <Box sx={{ flexGrow: 1, minHeight: 0, mt: 0.5 }}><MiniMap pts={pts} links={links} /></Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Label sx={{ flexGrow: 1 }}>{leftView === "map" ? "MAP — fit to all · links = pairs" : "NETWORK — shared people & places"}</Label>
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  {(["map", "graph"] as const).map((v) => (
+                    <Box
+                      key={v}
+                      onClick={() => setLeftView(v)}
+                      sx={{
+                        fontSize: 10,
+                        fontFamily: "JetBrains Mono, monospace",
+                        px: 0.75,
+                        py: 0.25,
+                        borderRadius: 0.75,
+                        cursor: "pointer",
+                        color: leftView === v ? "#0a0d12" : "text.secondary",
+                        bgcolor: leftView === v ? "#7aa7d6" : "rgba(255,255,255,0.06)",
+                        "&:hover": { bgcolor: leftView === v ? "#7aa7d6" : "rgba(255,255,255,0.12)" },
+                      }}
+                    >
+                      {v === "map" ? "Map" : "Network"}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+              <Box sx={{ flexGrow: 1, minHeight: 0, mt: 0.5 }}>
+                {leftView === "map" ? (
+                  <MiniMap pts={pts} links={links} />
+                ) : (
+                  <CaseGraph pts={pts} shared={shared} onOpen={(c) => { onSelect(c); onClose(); }} onEntity={onEntity} caseColor={dotColor} />
+                )}
+              </Box>
             </Box>
             <Box sx={{ flexShrink: 0, p: 1.5, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <Label>TIMELINE — these {cases.length} cases</Label>
