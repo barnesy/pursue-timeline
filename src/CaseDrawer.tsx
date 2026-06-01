@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -9,6 +9,8 @@ import Divider from "@mui/material/Divider";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import HubIcon from "@mui/icons-material/Hub";
+import FunctionsIcon from "@mui/icons-material/Functions";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import Tooltip from "@mui/material/Tooltip";
 import type { Case } from "./types";
@@ -17,6 +19,9 @@ import { DATASETS } from "./datasets";
 import { findNearby, formatDaysDelta } from "./proximity";
 import { isTrackedPublication, findReferencingDocs, findReferencedPublications } from "./publications";
 import type { EntityIndex, Entity } from "./entities";
+import { type CorpusStats, significanceLabel } from "./corpusStats";
+import { explainPair } from "./evidence";
+import { EvidencePanel } from "./EvidencePanel";
 import { fmtDistance, type UnitSystem } from "./blastPhysics";
 import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
@@ -35,17 +40,29 @@ type Props = {
    *  (used by the "Key figures" / "Authors" chips). */
   entityIndex?: EntityIndex;
   onEntity?: (entityId: string) => void;
+  /** Build-time corpus analytics (similar docs, p-values). */
+  corpusStats?: CorpusStats | null;
 };
 
 const DVIDS_VIDEO_URL = (id: string) => `https://www.dvidshub.net/video/${id}`;
 
-export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entityIndex, onEntity }: Props) {
+export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entityIndex, onEntity, corpusStats }: Props) {
   // Compute cross-dataset proximity once per (focused case, all-cases) tuple.
   const nearby = useMemo(
     () => findNearby(kase, allCases, { maxKm: 500, maxYears: 5, limit: 10 }),
     [kase, allCases],
   );
   const units = useUnits();
+  const byId = useMemo(() => new Map(allCases.map((c) => [c.id, c])), [allCases]);
+  // TF-IDF content-similar documents (build-time), resolved to cases.
+  const similar = useMemo(() => {
+    const raw = corpusStats?.similar[kase.id] || [];
+    return raw.map((s) => ({ ...s, case: byId.get(s.id) })).filter((s) => s.case) as { id: string; score: number; cross: boolean; case: Case }[];
+  }, [corpusStats, kase.id, byId]);
+  // Monte Carlo significance for UAP↔nuclear-test proximity, if applicable.
+  const pval = corpusStats?.uapPval[kase.id];
+  // Which related row has its "why connected?" evidence expanded.
+  const [openEvidence, setOpenEvidence] = useState<string | null>(null);
   // Published-work ↔ document citation cross-references (the "call out").
   const referencingDocs = useMemo(
     () => (isTrackedPublication(kase.id) ? findReferencingDocs(kase.id, allCases) : []),
@@ -220,6 +237,78 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
             </>
           )}
 
+          {/* Statistical-significance badge for UAP↔nuclear-test proximity.
+              The honesty layer: most UAP-near-a-test coincidences are expected
+              given the dense test calendar, and we say so. */}
+          {pval && (() => {
+            const sig = significanceLabel(pval.p);
+            return (
+              <>
+                <Divider sx={{ my: 1 }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <FunctionsIcon fontSize="small" sx={{ color: sig.color }} />
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Stack direction="row" spacing={0.75} alignItems="baseline">
+                      <Typography variant="caption" sx={{ color: sig.color, fontWeight: 700 }}>
+                        {sig.label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace" }}>
+                        p = {pval.p.toFixed(pval.p < 0.01 ? 4 : 3)}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.disabled" sx={{ display: "block", lineHeight: 1.35 }}>
+                      Nearest nuclear test {pval.nearestTestDays === 0 ? "same day" : `${pval.nearestTestDays.toLocaleString()} days away`} ·{" "}
+                      {sig.tier === "expected"
+                        ? "this proximity is unremarkable given how often tests fired."
+                        : "this proximity is tighter than chance would predict."}
+                    </Typography>
+                  </Box>
+                </Box>
+              </>
+            );
+          })()}
+
+          {/* Content-similar documents (TF-IDF). The "what it's about" axis the
+              entity/place network can't see — cross-dataset matches are bridges. */}
+          {similar.length > 0 && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                  <AutoAwesomeIcon fontSize="small" sx={{ color: "#c084fc" }} />
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    Similar documents
+                  </Typography>
+                </Stack>
+                <Stack spacing={0.5}>
+                  {similar.map((s) => {
+                    const meta = DATASETS[s.case.dataset];
+                    return (
+                      <Box
+                        key={s.id}
+                        onClick={() => onSelect(s.case)}
+                        sx={{ display: "flex", alignItems: "center", gap: 0.75, px: 1, py: 0.6, borderRadius: 1, cursor: "pointer", "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
+                      >
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: meta.color, flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
+                          {s.case.title}
+                        </Typography>
+                        {s.cross && (
+                          <Typography variant="caption" sx={{ color: "#c084fc", fontWeight: 700, flexShrink: 0 }}>
+                            bridge
+                          </Typography>
+                        )}
+                        <Typography variant="caption" sx={{ color: "text.disabled", fontFamily: "JetBrains Mono, monospace", flexShrink: 0 }}>
+                          {Math.round(s.score * 100)}%
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            </>
+          )}
+
           {nearby.length > 0 && (
             <>
               <Divider sx={{ my: 1 }} />
@@ -237,22 +326,10 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                 <Stack spacing={0.5}>
                   {nearby.map((n) => {
                     const meta = DATASETS[n.case.dataset];
+                    const evid = openEvidence === n.case.id ? explainPair(kase, n.case, pval) : [];
                     return (
-                      <Button
-                        key={n.case.id}
-                        variant="text"
-                        onClick={() => onSelect(n.case)}
-                        sx={{
-                          justifyContent: "flex-start",
-                          textAlign: "left",
-                          px: 1,
-                          py: 0.75,
-                          textTransform: "none",
-                          color: "text.primary",
-                          "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
-                        }}
-                      >
-                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                      <Box key={n.case.id} sx={{ px: 1, py: 0.75, borderRadius: 1, "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%", cursor: "pointer" }} onClick={() => onSelect(n.case)}>
                           <Stack
                             direction="row"
                             spacing={0.75}
@@ -313,7 +390,22 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                             </Stack>
                           )}
                         </Box>
-                      </Button>
+                        <Box
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); setOpenEvidence(openEvidence === n.case.id ? null : n.case.id); }}
+                          sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, mt: 0.4, cursor: "pointer", color: openEvidence === n.case.id ? "#cfe3ff" : "text.disabled", "&:hover": { color: "#cfe3ff" } }}
+                        >
+                          <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 600 }}>
+                            {openEvidence === n.case.id ? "Hide evidence" : "Why connected?"}
+                          </Typography>
+                        </Box>
+                        {evid.length > 0 && (
+                          <Box sx={{ mt: 0.6, pl: 1, borderLeft: "2px solid rgba(255,255,255,0.1)" }}>
+                            <EvidencePanel items={evid} dense />
+                          </Box>
+                        )}
+                      </Box>
                     );
                   })}
                 </Stack>

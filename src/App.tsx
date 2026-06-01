@@ -45,6 +45,7 @@ import { useUnits, unitsStore } from "./units";
 import { buildEntityIndex } from "./entities";
 import { EntityPanel } from "./EntityPanel";
 import { getLatLng } from "./proximity";
+import { loadCorpusStats, type CorpusStats } from "./corpusStats";
 import {
   DATASETS,
   DATASET_IDS,
@@ -275,6 +276,11 @@ export function App() {
   const [focusedEntityId, setFocusedEntityId] = useState<string | null>(null);
   // Cross-dataset people registry (Stargate figures + publication authors).
   const entityIndex = useMemo(() => buildEntityIndex(cases ?? []), [cases]);
+  // Build-time corpus analytics: TF-IDF similars, scored links, p-values.
+  const [corpusStats, setCorpusStats] = useState<CorpusStats | null>(null);
+  useEffect(() => {
+    loadCorpusStats(import.meta.env.BASE_URL).then(setCorpusStats);
+  }, []);
   const [casesOpen, setCasesOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
@@ -1210,6 +1216,7 @@ export function App() {
                     onCollapse={() => detailPanelRef.current?.collapse()}
                     entityIndex={entityIndex}
                     onEntity={setFocusedEntityId}
+                    corpusStats={corpusStats}
                   />
                 </Panel>
               </>
@@ -1270,6 +1277,7 @@ export function App() {
                   onCollapse={() => setMobileDrawer(null)}
                   entityIndex={entityIndex}
                   onEntity={setFocusedEntityId}
+                  corpusStats={corpusStats}
                 />
               )}
             </Drawer>
