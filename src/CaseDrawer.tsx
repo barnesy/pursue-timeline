@@ -22,6 +22,8 @@ import type { EntityIndex, Entity } from "./entities";
 import { type CorpusStats, significanceLabel } from "./corpusStats";
 import { explainPair } from "./evidence";
 import { EvidencePanel } from "./EvidencePanel";
+import { buildHypothesis } from "./hypothesis";
+import { HypothesisCard } from "./HypothesisCard";
 import { fmtDistance, type UnitSystem } from "./blastPhysics";
 import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
@@ -63,6 +65,8 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
   const pval = corpusStats?.uapPval[kase.id];
   // Which related row has its "why connected?" evidence expanded.
   const [openEvidence, setOpenEvidence] = useState<string | null>(null);
+  // The cross-dataset relation currently under adversarial hypothesis test.
+  const [hypoCase, setHypoCase] = useState<Case | null>(null);
   // Published-work ↔ document citation cross-references (the "call out").
   const referencingDocs = useMemo(
     () => (isTrackedPublication(kase.id) ? findReferencingDocs(kase.id, allCases) : []),
@@ -390,15 +394,27 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                             </Stack>
                           )}
                         </Box>
-                        <Box
-                          role="button"
-                          tabIndex={0}
-                          onClick={(e) => { e.stopPropagation(); setOpenEvidence(openEvidence === n.case.id ? null : n.case.id); }}
-                          sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, mt: 0.4, cursor: "pointer", color: openEvidence === n.case.id ? "#cfe3ff" : "text.disabled", "&:hover": { color: "#cfe3ff" } }}
-                        >
-                          <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 600 }}>
-                            {openEvidence === n.case.id ? "Hide evidence" : "Why connected?"}
-                          </Typography>
+                        <Box sx={{ display: "flex", gap: 1.5, mt: 0.4 }}>
+                          <Box
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => { e.stopPropagation(); setOpenEvidence(openEvidence === n.case.id ? null : n.case.id); }}
+                            sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, cursor: "pointer", color: openEvidence === n.case.id ? "#cfe3ff" : "text.disabled", "&:hover": { color: "#cfe3ff" } }}
+                          >
+                            <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 600 }}>
+                              {openEvidence === n.case.id ? "Hide evidence" : "Why connected?"}
+                            </Typography>
+                          </Box>
+                          <Box
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => { e.stopPropagation(); setHypoCase(n.case); }}
+                            sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, cursor: "pointer", color: "text.disabled", "&:hover": { color: "#cfe3ff" } }}
+                          >
+                            <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 600 }}>
+                              ⚖ Test this connection
+                            </Typography>
+                          </Box>
                         </Box>
                         {evid.length > 0 && (
                           <Box sx={{ mt: 0.6, pl: 1, borderLeft: "2px solid rgba(255,255,255,0.1)" }}>
@@ -546,6 +562,13 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
           </Typography>
         )}
       </Box>
+
+      {hypoCase && (
+        <HypothesisCard
+          hyp={buildHypothesis(kase, hypoCase, explainPair(kase, hypoCase, pval), pval)}
+          onClose={() => setHypoCase(null)}
+        />
+      )}
     </Box>
   );
 }
