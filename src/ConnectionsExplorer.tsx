@@ -27,6 +27,7 @@ import { EvidencePanel } from "./EvidencePanel";
 import { buildHypothesis } from "./hypothesis";
 import { CorpusDashboard } from "./CorpusDashboard";
 import { useMobile } from "./useMobile";
+import { clickable } from "./a11y";
 
 type Props = {
   open: boolean;
@@ -144,10 +145,10 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
               {filtered.length}/{rows.length}
             </Typography>
             <Tooltip title="Export filtered links as Markdown">
-              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportMarkdown} sx={{ textTransform: "none", color: "text.secondary" }}>.md</Button>
+              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportMarkdown} aria-label="Export filtered links as Markdown" sx={{ textTransform: "none", color: "text.secondary" }}>.md</Button>
             </Tooltip>
             <Tooltip title="Export filtered links as JSON">
-              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportJson} sx={{ textTransform: "none", color: "text.secondary" }}>.json</Button>
+              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportJson} aria-label="Export filtered links as JSON" sx={{ textTransform: "none", color: "text.secondary" }}>.json</Button>
             </Tooltip>
           </>
         )}
@@ -191,7 +192,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
           <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontFamily: "JetBrains Mono, monospace" }}>
             min score <b style={{ color: "#e6ecf2" }}>{minScore.toFixed(2)}</b>
           </Typography>
-          <Slider size="small" value={minScore} min={0} max={1.3} step={0.05} onChange={(_, v) => setMinScore(v as number)} sx={{ width: 90 }} />
+          <Slider size="small" value={minScore} min={0} max={1.3} step={0.05} onChange={(_, v) => setMinScore(v as number)} aria-label="Minimum connection score" sx={{ width: 90 }} />
         </Box>
         <Stack direction="row" spacing={0.5}>
           {(["score", "verdict"] as const).map((s) => (
@@ -218,7 +219,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
               const isOpen = expanded === r.id;
               return (
                 <Box key={r.id} sx={{ border: "1px solid rgba(255,255,255,0.06)", borderRadius: 1.5, p: 1.25, bgcolor: isOpen ? "rgba(255,255,255,0.02)" : "transparent" }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={() => setExpanded(isOpen ? null : r.id)}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} {...clickable(() => setExpanded(isOpen ? null : r.id))} aria-expanded={isOpen} aria-label={`${r.hyp.verdict.label}: ${r.a.title} and ${r.b.title}`}>
                     {/* verdict ring */}
                     <Box sx={{ position: "relative", width: 30, height: 30, flexShrink: 0 }}>
                       <Box sx={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.08)" }} />

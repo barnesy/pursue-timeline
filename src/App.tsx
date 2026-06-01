@@ -53,6 +53,7 @@ import { EntityPanel } from "./EntityPanel";
 import { getLatLng } from "./proximity";
 import { loadCorpusStats, type CorpusStats } from "./corpusStats";
 import { loadSearch, rankedIds } from "./search";
+import { clickable } from "./a11y";
 import {
   DATASETS,
   DATASET_IDS,
@@ -1050,7 +1051,9 @@ export function App() {
         }}
       >
         <Box
-          onClick={() => setFiltersCollapsed((v) => !v)}
+          {...clickable(() => setFiltersCollapsed((v) => !v))}
+          aria-expanded={!filtersCollapsed}
+          aria-label="Toggle filters"
           sx={{
             px: { xs: 1.5, md: 3 },
             py: 0.75,

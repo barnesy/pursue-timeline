@@ -30,6 +30,7 @@ import { useUnits } from "./units";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { casesStore, useCaseIds } from "./collection";
 import { useMobile } from "./useMobile";
+import { clickable } from "./a11y";
 import { CaseGraph } from "./CaseGraph";
 import type { EntityIndex, Entity } from "./entities";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -154,12 +155,14 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
                   {(["map", "graph"] as const).map((v) => (
                     <Box
                       key={v}
-                      onClick={() => setLeftView(v)}
+                      {...clickable(() => setLeftView(v))}
+                      aria-pressed={leftView === v}
+                      aria-label={v === "map" ? "Map view" : "Network view"}
                       sx={{
                         fontSize: 10,
                         fontFamily: "JetBrains Mono, monospace",
-                        px: 0.75,
-                        py: 0.25,
+                        px: 1,
+                        py: { xs: 0.6, md: 0.25 },
                         borderRadius: 0.75,
                         cursor: "pointer",
                         color: leftView === v ? "#0a0d12" : "text.secondary",
@@ -255,7 +258,7 @@ function CaseCard({ pt, links, onOpen }: { pt: Pt; links: Link[]; onOpen: (c: Ca
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.5 }}>
           <Box sx={{ width: 18, height: 18, borderRadius: "50%", bgcolor: color, color: "#0a0d12", fontSize: 10, fontWeight: 800, fontFamily: "JetBrains Mono, monospace", display: "grid", placeItems: "center", flexShrink: 0 }}>{pt.i}</Box>
           <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace", fontSize: 9.5, flexGrow: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{meta}</Typography>
-          <IconButton size="small" onClick={() => casesStore.remove(c.id)} aria-label="Remove" sx={{ color: "text.disabled", p: 0.25 }}><CloseIcon sx={{ fontSize: 15 }} /></IconButton>
+          <IconButton size="small" onClick={() => casesStore.remove(c.id)} aria-label={`Remove ${c.title} from cases`} sx={{ color: "text.disabled", p: 0.25 }}><CloseIcon sx={{ fontSize: 15 }} /></IconButton>
         </Box>
         <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.3 }}>{c.title}</Typography>
         {showSparks && (
@@ -311,7 +314,8 @@ function SharedRow({ s, pts, onEntity }: { s: SharedEntity; pts: Pt[]; onEntity?
   const Icon = isPlace ? PlaceOutlinedIcon : PersonOutlineIcon;
   return (
     <Box
-      onClick={onEntity ? () => onEntity(s.entity.id) : undefined}
+      {...(onEntity ? clickable(() => onEntity(s.entity.id)) : {})}
+      aria-label={onEntity ? `See everywhere ${s.entity.name} appears` : undefined}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -360,7 +364,7 @@ function Slider2({ label, value, min, max, step, unit, displayValue, onChange }:
       <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontFamily: "JetBrains Mono, monospace" }}>
         {label} <b style={{ color: "#e6ecf2" }}>{displayValue ?? `${value} ${unit}`}</b>
       </Typography>
-      <Slider size="small" value={value} min={min} max={max} step={step} onChange={(_, v) => onChange(v as number)} sx={{ width: 70 }} />
+      <Slider size="small" value={value} min={min} max={max} step={step} onChange={(_, v) => onChange(v as number)} aria-label={label} sx={{ width: 70 }} />
     </Box>
   );
 }

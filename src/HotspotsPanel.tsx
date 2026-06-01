@@ -21,6 +21,7 @@ import { NOTABLE_HOTSPOTS, type NotableHotspot } from "./notableHotspots";
 import type { EntityIndex } from "./entities";
 import type { CorpusStats } from "./corpusStats";
 import { PLACES } from "./places";
+import { clickable } from "./a11y";
 
 const PLACE_NAME = new Map(PLACES.map((p) => [p.id, p.name]));
 
@@ -164,7 +165,8 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
               {topLinks.map((l, i) => (
                 <Box
                   key={i}
-                  onClick={() => onSelectCase(l.a)}
+                  {...clickable(() => onSelectCase(l.a))}
+                  aria-label={`Open ${l.a.title}`}
                   sx={{ px: 2, py: 0.75, cursor: "pointer", "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.25 }}>
@@ -211,7 +213,8 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
                 return (
                   <Box
                     key={e.id}
-                    onClick={() => onEntity(e.id)}
+                    {...clickable(() => onEntity(e.id))}
+                    aria-label={`See everywhere ${e.name} appears`}
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -257,7 +260,9 @@ function NotableHotspotItem({
 }) {
   return (
     <Box
-      onClick={onClick}
+      {...clickable(onClick)}
+      aria-pressed={selected}
+      aria-label={`Focus hotspot: ${hotspot.title}`}
       sx={{
         px: 1.5,
         py: 1.25,
