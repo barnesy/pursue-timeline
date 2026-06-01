@@ -11,11 +11,30 @@ export type CorpusLink = {
 };
 export type UapPval = { nearestTestDays: number; p: number };
 
+export type CorpusSummary = {
+  totalDocs: number;
+  perDataset: Record<string, number>;
+  datedDocs: number;
+  yearRange: [number, number];
+  pval: {
+    n: number;
+    median: number;
+    histogram: number[]; // 10 bins over [0,1]
+    significant: number;
+    weak: number;
+    coincidental: number;
+  };
+  linkByKind: { people: number; places: number; content: number };
+  pairCounts: Record<string, number>;
+  topEntities: { name: string; type: string; docs: number; datasets: number }[];
+};
+
 export type CorpusStats = {
   generatedFrom: number;
   similar: Record<string, SimilarDoc[]>;
   links: CorpusLink[];
   uapPval: Record<string, UapPval>;
+  summary?: CorpusSummary;
 };
 
 const EMPTY: CorpusStats = { generatedFrom: 0, similar: {}, links: [], uapPval: {} };

@@ -25,6 +25,7 @@ import type { CorpusStats, CorpusLink } from "./corpusStats";
 import { explainPair } from "./evidence";
 import { EvidencePanel } from "./EvidencePanel";
 import { buildHypothesis } from "./hypothesis";
+import { CorpusDashboard } from "./CorpusDashboard";
 
 type Props = {
   open: boolean;
@@ -46,6 +47,7 @@ type SortKey = "score" | "verdict";
 
 export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSelect }: Props) {
   const byId = useMemo(() => new Map(allCases.map((c) => [c.id, c])), [allCases]);
+  const [tab, setTab] = useState<"overview" | "links">("overview");
   const [kind, setKind] = useState<ConnKind | "all">("all");
   const [minScore, setMinScore] = useState(0);
   const [sort, setSort] = useState<SortKey>("score");
@@ -120,19 +122,48 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap" }}>
         <HubIcon fontSize="small" sx={{ color: "#cfe3ff" }} />
         <Typography sx={{ fontWeight: 800, fontSize: 15 }}>Connections Explorer</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace" }}>
-          {filtered.length} of {rows.length} scored cross-document links
-        </Typography>
+        <Stack direction="row" spacing={0.5} sx={{ ml: 1 }}>
+          {(["overview", "links"] as const).map((tb) => (
+            <Chip
+              key={tb}
+              size="small"
+              label={tb === "overview" ? "Overview" : "Links"}
+              onClick={() => setTab(tb)}
+              sx={{ bgcolor: tab === tb ? "rgba(122,184,255,0.18)" : "rgba(255,255,255,0.04)", color: tab === tb ? "#cfe3ff" : "text.secondary", border: `1px solid ${tab === tb ? "rgba(122,184,255,0.5)" : "rgba(255,255,255,0.1)"}`, cursor: "pointer", fontWeight: 600 }}
+            />
+          ))}
+        </Stack>
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title="Export filtered links as Markdown">
-          <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportMarkdown} sx={{ textTransform: "none", color: "text.secondary" }}>.md</Button>
-        </Tooltip>
-        <Tooltip title="Export filtered links as JSON">
-          <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportJson} sx={{ textTransform: "none", color: "text.secondary" }}>.json</Button>
-        </Tooltip>
+        {tab === "links" && (
+          <>
+            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace", mr: 0.5 }}>
+              {filtered.length}/{rows.length}
+            </Typography>
+            <Tooltip title="Export filtered links as Markdown">
+              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportMarkdown} sx={{ textTransform: "none", color: "text.secondary" }}>.md</Button>
+            </Tooltip>
+            <Tooltip title="Export filtered links as JSON">
+              <Button size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />} onClick={exportJson} sx={{ textTransform: "none", color: "text.secondary" }}>.json</Button>
+            </Tooltip>
+          </>
+        )}
         <IconButton size="small" onClick={onClose} aria-label="Close"><CloseIcon fontSize="small" /></IconButton>
       </Box>
 
+      {tab === "overview" && (
+        <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto" }}>
+          {corpusStats?.summary ? (
+            <CorpusDashboard summary={corpusStats.summary} />
+          ) : (
+            <Box sx={{ display: "grid", placeItems: "center", height: "100%", color: "text.disabled" }}>
+              <Typography variant="body2">Corpus summary not available.</Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {tab === "links" && (
+      <>
       {/* Filter bar */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderBottom: "1px solid rgba(255,255,255,0.06)", flexWrap: "wrap" }}>
         <Stack direction="row" spacing={0.75}>
@@ -220,6 +251,8 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
           </Stack>
         )}
       </Box>
+      </>
+      )}
     </Dialog>
   );
 }

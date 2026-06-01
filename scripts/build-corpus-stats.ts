@@ -250,11 +250,71 @@ function main() {
     links.sort((a, b) => b.score - a.score);
     const topLinks = links.slice(0, 200);
 
+    // ── Aggregate summary for the corpus dashboard (a few KB) ───────────────
+    // The honesty headline + the shape of the corpus, computed once here.
+    const perDataset: Record<string, number> = {};
+    for (const c of cases) perDataset[c.dataset] = (perDataset[c.dataset] || 0) + 1;
+
+    // p-value distribution — the anti-pareidolia headline. We want it to SHOW
+    // that most UAP↔test proximities are expected (high p), few are surprising.
+    const pvals = Object.values(uapPval).map((x) => x.p).sort((a, b) => a - b);
+    const pctile = (q: number) => (pvals.length ? pvals[Math.min(pvals.length - 1, Math.floor(q * pvals.length))] : 0);
+    const pvalSummary = {
+      n: pvals.length,
+      median: +pctile(0.5).toFixed(3),
+      // histogram over 10 bins [0,1]
+      histogram: Array.from({ length: 10 }, (_, b) => pvals.filter((p) => p >= b / 10 && p < (b + 1) / 10 || (b === 9 && p === 1)).length),
+      significant: pvals.filter((p) => p < 0.05).length,
+      weak: pvals.filter((p) => p >= 0.05 && p < 0.2).length,
+      coincidental: pvals.filter((p) => p >= 0.2).length,
+    };
+
+    // Link composition (people / places / content) + per-dataset-pair counts.
+    const linkByKind = { people: 0, places: 0, content: 0 };
+    const pairCounts: Record<string, number> = {};
+    for (const l of topLinks) {
+      const kind = l.sharedPeople.length ? "people" : l.sharedPlaces.length ? "places" : "content";
+      linkByKind[kind]++;
+      const A = idToIdx.get(l.a), B = idToIdx.get(l.b);
+      if (A != null && B != null) {
+        const k = [cases[A].dataset, cases[B].dataset].sort().join(" ↔ ");
+        pairCounts[k] = (pairCounts[k] || 0) + 1;
+      }
+    }
+
+    // Top entities by cross-dataset reach (people + places that span datasets).
+    const entityReach = new Map<string, { name: string; type: string; cases: Set<string>; datasets: Set<string> }>();
+    cases.forEach((c, i) => {
+      const add = (key: string, name: string, type: string) => {
+        const e = entityReach.get(key) || { name, type, cases: new Set(), datasets: new Set() };
+        e.cases.add(c.id); e.datasets.add(c.dataset); entityReach.set(key, e);
+      };
+      for (const p of ent[i].people) add(`person:${p}`, p, "person");
+      for (const p of ent[i].places) add(`place:${p}`, p, "place");
+    });
+    const topEntities = [...entityReach.values()]
+      .map((e) => ({ name: e.name, type: e.type, docs: e.cases.size, datasets: e.datasets.size }))
+      .filter((e) => e.datasets >= 2)
+      .sort((a, b) => b.datasets - a.datasets || b.docs - a.docs)
+      .slice(0, 12);
+
+    const summary = {
+      totalDocs: N,
+      perDataset,
+      datedDocs: t.filter((x) => x != null).length,
+      yearRange: (() => { const ys = cases.map((c) => (c.incidentDate ? +c.incidentDate.slice(0, 4) : null)).filter((y): y is number => !!y); return [Math.min(...ys), Math.max(...ys)]; })(),
+      pval: pvalSummary,
+      linkByKind,
+      pairCounts,
+      topEntities,
+    };
+
     const stats = {
       generatedFrom: N,
       similar,
       links: topLinks,
       uapPval,
+      summary,
       sharedTermsHint: "computed on demand client-side",
     };
     await writeFile(resolve(PUB, "corpus-stats.json"), JSON.stringify(stats));
