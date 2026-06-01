@@ -1175,6 +1175,8 @@ export function App() {
                 onCollapse={() => hotspotsPanelRef.current?.collapse()}
                 entityIndex={entityIndex}
                 onEntity={setFocusedEntityId}
+                corpusStats={corpusStats}
+                onSelectCase={setSelected}
               />
             </Panel>
             <ResizeHandle />
@@ -1255,6 +1257,11 @@ export function App() {
                 entityIndex={entityIndex}
                 onEntity={(id) => {
                   setFocusedEntityId(id);
+                  setMobileDrawer(null);
+                }}
+                corpusStats={corpusStats}
+                onSelectCase={(c) => {
+                  setSelected(c);
                   setMobileDrawer(null);
                 }}
               />

@@ -19,6 +19,10 @@ import type { Case } from "./types";
 import { DATASETS, type DatasetId } from "./datasets";
 import { NOTABLE_HOTSPOTS, type NotableHotspot } from "./notableHotspots";
 import type { EntityIndex } from "./entities";
+import type { CorpusStats } from "./corpusStats";
+import { PLACES } from "./places";
+
+const PLACE_NAME = new Map(PLACES.map((p) => [p.id, p.name]));
 
 type Props = {
   /** Full case set (un-focused) — so totals don't shrink when a hotspot is
@@ -31,9 +35,12 @@ type Props = {
   /** Cross-dataset entity registry — powers the "Top connectors" section. */
   entityIndex?: EntityIndex;
   onEntity?: (entityId: string) => void;
+  /** Build-time analytics — powers the "Strongest correlations" feed. */
+  corpusStats?: CorpusStats | null;
+  onSelectCase?: (c: Case) => void;
 };
 
-export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onCollapse, entityIndex, onEntity }: Props) {
+export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onCollapse, entityIndex, onEntity, corpusStats, onSelectCase }: Props) {
   // Per-hotspot stats: total matches + per-dataset breakdown.
   const stats = NOTABLE_HOTSPOTS.map((h) => {
     const matches = allCases.filter(h.matches);
@@ -59,6 +66,29 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
       .sort((a, b) => b.datasets - a.datasets || b.e.caseIds.length - a.e.caseIds.length)
       .slice(0, 8);
   }, [entityIndex, allCases]);
+
+  // Strongest cross-document correlations corpus-wide (build-time scored).
+  // Deduped so a single hub (e.g. one paper cited by many Stargate docs)
+  // doesn't flood the feed — at most one link per (datasetA→datasetB) reason.
+  const topLinks = useMemo(() => {
+    if (!corpusStats || !onSelectCase) return [];
+    const byId = new Map(allCases.map((c) => [c.id, c]));
+    const out: { a: Case; b: Case; score: number; reason: string }[] = [];
+    const seenReason = new Set<string>();
+    for (const l of corpusStats.links) {
+      const a = byId.get(l.a), b = byId.get(l.b);
+      if (!a || !b) continue;
+      const dedupKey = l.sharedPeople[0] || l.sharedPlaces[0] || `${a.dataset}~${b.dataset}`;
+      if (seenReason.has(dedupKey)) continue;
+      seenReason.add(dedupKey);
+      // sharedPlaces are place IDs — resolve to the human name for display.
+      const placeName = l.sharedPlaces[0] ? PLACE_NAME.get(l.sharedPlaces[0]) || l.sharedPlaces[0] : null;
+      const reason = l.sharedPeople[0] || placeName || "content match";
+      out.push({ a, b, score: l.score, reason });
+      if (out.length >= 6) break;
+    }
+    return out;
+  }, [corpusStats, allCases, onSelectCase]);
 
   return (
     <Box
@@ -121,6 +151,41 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
             />
           ))}
         </Stack>
+
+        {topLinks.length > 0 && onSelectCase && (
+          <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.08)", mt: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{ display: "block", px: 2, pt: 1.5, pb: 0.5, color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 10 }}
+            >
+              Strongest correlations
+            </Typography>
+            <Stack sx={{ pb: 1 }}>
+              {topLinks.map((l, i) => (
+                <Box
+                  key={i}
+                  onClick={() => onSelectCase(l.a)}
+                  sx={{ px: 2, py: 0.75, cursor: "pointer", "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.25 }}>
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[l.a.dataset].color, flexShrink: 0 }} />
+                    <Box sx={{ width: 12, borderTop: "1px dashed rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[l.b.dataset].color, flexShrink: 0 }} />
+                    <Typography variant="caption" sx={{ color: "#ffb454", fontFamily: "JetBrains Mono, monospace", flexGrow: 1, textAlign: "right", fontSize: 10 }}>
+                      via {l.reason}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ display: "block", color: "text.primary", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {l.a.title}
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: "block", color: "text.secondary", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    ↔ {l.b.title}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+        )}
 
         {connectors.length > 0 && onEntity && (
           <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.08)", mt: 0.5 }}>
