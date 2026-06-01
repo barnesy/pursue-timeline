@@ -64,8 +64,8 @@ const TYPE_LABELS: Record<string, string> = {
 const COUNTRY_SOURCE_URL: Record<string, string> = {
   "United States": "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_the_United_States",
   "Soviet Union": "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_the_Soviet_Union",
-  "United Kingdom": "https://en.wikipedia.org/wiki/List_of_British_nuclear_weapons_tests",
-  France: "https://en.wikipedia.org/wiki/List_of_French_nuclear_tests",
+  "United Kingdom": "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_the_United_Kingdom",
+  France: "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_France",
   China: "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_China",
   India: "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_India",
   Pakistan: "https://en.wikipedia.org/wiki/List_of_nuclear_weapons_tests_of_Pakistan",
