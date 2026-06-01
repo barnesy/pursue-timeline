@@ -116,7 +116,7 @@ export function EntityPanel({
               <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: g.meta.color }} />
               <Typography
                 variant="caption"
-                sx={{ textTransform: "uppercase", letterSpacing: "0.08em", color: g.meta.color, fontWeight: 700 }}
+                sx={{ textTransform: "capitalize", letterSpacing: "0.08em", color: g.meta.color, fontWeight: 700 }}
               >
                 {g.meta.shortName} · {g.cases.length}
               </Typography>

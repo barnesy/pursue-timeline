@@ -1058,7 +1058,7 @@ export function App() {
             sx={{
               color: "text.primary",
               fontWeight: 700,
-              textTransform: "uppercase",
+              textTransform: "capitalize",
               letterSpacing: "0.08em",
               fontSize: 11,
             }}
@@ -1545,7 +1545,7 @@ function FilterRow({ label, items }: { label: string; items: FilterItem[] }) {
         color="text.secondary"
         sx={{
           minWidth: { xs: 42, md: 56 },
-          textTransform: "uppercase",
+          textTransform: "capitalize",
           letterSpacing: "0.08em",
           fontWeight: 600,
           flexShrink: 0,

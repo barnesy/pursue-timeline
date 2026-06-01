@@ -722,7 +722,7 @@ export function MapView({
             variant="caption"
             sx={{
               color: "text.secondary",
-              textTransform: "uppercase",
+              textTransform: "capitalize",
               letterSpacing: "0.08em",
               fontWeight: 600,
             }}

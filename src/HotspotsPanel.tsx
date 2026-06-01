@@ -116,7 +116,7 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
           sx={{
             color: "text.primary",
             fontWeight: 700,
-            textTransform: "uppercase",
+            textTransform: "capitalize",
             letterSpacing: "0.08em",
             fontSize: 10,
             flexGrow: 1,
@@ -156,7 +156,7 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
           <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.08)", mt: 0.5 }}>
             <Typography
               variant="caption"
-              sx={{ display: "block", px: 2, pt: 1.5, pb: 0.5, color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 10 }}
+              sx={{ display: "block", px: 2, pt: 1.5, pb: 0.5, color: "text.secondary", fontWeight: 700, textTransform: "capitalize", letterSpacing: "0.08em", fontSize: 10 }}
             >
               Strongest correlations
             </Typography>
@@ -198,7 +198,7 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
                 pb: 0.5,
                 color: "text.secondary",
                 fontWeight: 700,
-                textTransform: "uppercase",
+                textTransform: "capitalize",
                 letterSpacing: "0.08em",
                 fontSize: 10,
               }}

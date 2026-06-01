@@ -782,7 +782,7 @@ export function BlastDiagram({ kase }: Props) {
             fontFamily: "JetBrains Mono, monospace",
             fontSize: 9,
             color: "text.secondary",
-            textTransform: "uppercase",
+            textTransform: "capitalize",
             letterSpacing: "0.08em",
           }}
         >
@@ -1021,7 +1021,7 @@ export function BlastDiagram({ kase }: Props) {
             fontFamily: "JetBrains Mono, monospace",
             fontSize: 9,
             color: "text.secondary",
-            textTransform: "uppercase",
+            textTransform: "capitalize",
             letterSpacing: "0.08em",
             flexGrow: 1,
           }}

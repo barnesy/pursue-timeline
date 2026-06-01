@@ -556,7 +556,7 @@ export function Timeline({ cases, groups, onSelect, selectedCase, xDomain, onXDo
                   fontSize={11}
                   fontWeight={700}
                   letterSpacing="0.08em"
-                  style={{ textTransform: "uppercase" }}
+                  style={{ textTransform: "capitalize" }}
                 >
                   {lane.datasetMeta.shortName}
                 </text>
@@ -946,7 +946,7 @@ function BrushBand({
         fontWeight={600}
         letterSpacing="0.06em"
         pointerEvents="none"
-        style={{ textTransform: "uppercase" }}
+        style={{ textTransform: "capitalize" }}
       >
         {dragging
           ? "Release to zoom"

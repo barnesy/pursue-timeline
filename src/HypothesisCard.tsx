@@ -26,7 +26,7 @@ export function HypothesisCard({ hyp, onClose }: { hyp: Hypothesis; onClose: () 
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.25, px: 2.5, py: 1.75, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <BalanceOutlinedIcon sx={{ color: "#cfe3ff", mt: 0.3 }} />
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, fontSize: 10 }}>
+          <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "capitalize", letterSpacing: "0.1em", fontWeight: 700, fontSize: 10 }}>
             Hypothesis test
           </Typography>
           <Typography sx={{ fontWeight: 700, lineHeight: 1.3, mt: 0.25 }}>{hyp.claim}</Typography>
@@ -75,7 +75,7 @@ function Section({ icon, title, color, children }: { icon: React.ReactNode; titl
     <Box>
       <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.75 }}>
         {icon}
-        <Typography variant="caption" sx={{ color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+        <Typography variant="caption" sx={{ color, fontWeight: 700, textTransform: "capitalize", letterSpacing: "0.06em" }}>
           {title}
         </Typography>
       </Stack>

@@ -84,7 +84,7 @@ export function InvestigationBrief({
           </Box>
         ) : (
           <>
-            <Typography variant="caption" sx={{ color: "text.secondary", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>
+            <Typography variant="caption" sx={{ color: "text.secondary", letterSpacing: "0.1em", textTransform: "capitalize", fontWeight: 700 }}>
               Off Nominal · Investigation Brief
             </Typography>
             <Typography sx={{ fontWeight: 800, fontSize: 24, lineHeight: 1.2, mt: 0.5 }}>{title}</Typography>
@@ -166,7 +166,7 @@ export function InvestigationBrief({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Box sx={{ mt: 2.5 }} className="brief-section">
-      <Typography sx={{ fontWeight: 700, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.06em", color: "#cfe3ff", mb: 1, pb: 0.5, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+      <Typography sx={{ fontWeight: 700, fontSize: 13, textTransform: "capitalize", letterSpacing: "0.06em", color: "#cfe3ff", mb: 1, pb: 0.5, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
         {title}
       </Typography>
       {children}

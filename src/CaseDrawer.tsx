@@ -10,7 +10,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import HubIcon from "@mui/icons-material/Hub";
 import FunctionsIcon from "@mui/icons-material/Functions";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import Tooltip from "@mui/material/Tooltip";
 import type { Case } from "./types";
@@ -201,7 +200,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                  sx={{ textTransform: "capitalize", letterSpacing: "0.08em" }}
                 >
                   Description
                 </Typography>
@@ -279,8 +278,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
               <Divider sx={{ my: 1 }} />
               <Box>
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                  <AutoAwesomeIcon fontSize="small" sx={{ color: "#c084fc" }} />
-                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize", letterSpacing: "0.08em" }}>
                     Similar documents
                   </Typography>
                 </Stack>
@@ -322,7 +320,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                    sx={{ textTransform: "capitalize", letterSpacing: "0.08em" }}
                   >
                     Cross-dataset · within {fmtDistance(500_000, units)} · ± 5 years
                   </Typography>
@@ -439,7 +437,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                    sx={{ textTransform: "capitalize", letterSpacing: "0.08em" }}
                   >
                     Referenced in {referencingDocs.length} declassified file{referencingDocs.length === 1 ? "" : "s"}
                   </Typography>
@@ -488,7 +486,7 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entit
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
+                  sx={{ textTransform: "capitalize", letterSpacing: "0.08em", display: "block", mb: 1 }}
                 >
                   References published work{referencedPubs.length === 1 ? "" : "s"}
                 </Typography>
@@ -591,7 +589,7 @@ function EntityChipRow({
       <Typography
         variant="caption"
         color="text.secondary"
-        sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
+        sx={{ textTransform: "capitalize", letterSpacing: "0.08em", display: "block", mb: 1 }}
       >
         {label}
       </Typography>
@@ -637,7 +635,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
         color="text.secondary"
         sx={{
           minWidth: 110,
-          textTransform: "uppercase",
+          textTransform: "capitalize",
           letterSpacing: "0.08em",
           pt: 0.25,
         }}

@@ -27,7 +27,7 @@ export function CorpusDashboard({ summary }: { summary: CorpusSummary }) {
 
       {/* The honesty headline: p-value distribution */}
       <Box sx={{ mb: 2, p: 1.5, borderRadius: 1.5, border: "1px solid rgba(255,255,255,0.08)", bgcolor: "rgba(255,255,255,0.02)" }}>
-        <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontSize: 10 }}>
+        <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "capitalize", letterSpacing: "0.08em", fontWeight: 700, fontSize: 10 }}>
           Are UAP sightings unusually close to nuclear tests?
         </Typography>
         <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5, mb: 1.5, lineHeight: 1.45 }}>
@@ -101,7 +101,7 @@ export function CorpusDashboard({ summary }: { summary: CorpusSummary }) {
 function Card({ label, value, sub, big }: { label: string; value: string; sub?: string; big?: boolean }) {
   return (
     <Box sx={{ flex: big ? "1 1 160px" : "0 0 auto", p: 1.5, borderRadius: 1.5, border: "1px solid rgba(255,255,255,0.08)", bgcolor: "rgba(255,255,255,0.02)", minWidth: 150 }}>
-      <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 9.5 }}>{label}</Typography>
+      <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "capitalize", letterSpacing: "0.06em", fontSize: 9.5 }}>{label}</Typography>
       <Typography sx={{ fontWeight: 800, fontSize: 26, lineHeight: 1.1, fontFamily: "JetBrains Mono, monospace" }}>{value}</Typography>
       {sub && <Typography variant="caption" sx={{ color: "text.disabled" }}>{sub}</Typography>}
     </Box>
@@ -110,7 +110,7 @@ function Card({ label, value, sub, big }: { label: string; value: string; sub?: 
 
 function SectionLabel({ children, sx }: { children: React.ReactNode; sx?: object }) {
   return (
-    <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontSize: 10, ...sx }}>
+    <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "capitalize", letterSpacing: "0.08em", fontWeight: 700, fontSize: 10, ...sx }}>
       {children}
     </Typography>
   );

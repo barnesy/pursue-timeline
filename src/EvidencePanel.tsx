@@ -42,7 +42,7 @@ export function EvidencePanel({ items, dense }: { items: EvidenceItem[]; dense?:
             <Icon sx={{ fontSize: 15, color, mt: 0.2, flexShrink: 0 }} />
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: 9.5 }}>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "capitalize", letterSpacing: "0.05em", fontSize: 9.5 }}>
                   {it.label}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "text.primary", flexGrow: 1, minWidth: 0 }}>
