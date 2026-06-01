@@ -16,6 +16,7 @@ import { AGENCY_COLORS, AGENCY_SHORT, TYPE_COLORS, TYPE_LABELS } from "./theme";
 import { DATASETS } from "./datasets";
 import { findNearby, formatDaysDelta } from "./proximity";
 import { isTrackedPublication, findReferencingDocs, findReferencedPublications } from "./publications";
+import type { EntityIndex } from "./entities";
 import { fmtDistance, type UnitSystem } from "./blastPhysics";
 import { useUnits } from "./units";
 import { BlastDiagram } from "./BlastDiagram";
@@ -30,13 +31,15 @@ type Props = {
   /** When provided, the header renders a collapse button (in addition to
    *  the close X) that calls this instead of clearing the selection. */
   onCollapse?: () => void;
-  /** Run a search (used by the "Key figures" chips to find co-occurring files). */
-  onSearch?: (term: string) => void;
+  /** Cross-dataset entity registry + a callback to open an entity's panel
+   *  (used by the "Key figures" / "Authors" chips). */
+  entityIndex?: EntityIndex;
+  onEntity?: (entityId: string) => void;
 };
 
 const DVIDS_VIDEO_URL = (id: string) => `https://www.dvidshub.net/video/${id}`;
 
-export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, onSearch }: Props) {
+export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, entityIndex, onEntity }: Props) {
   // Compute cross-dataset proximity once per (focused case, all-cases) tuple.
   const nearby = useMemo(
     () => findNearby(kase, allCases, { maxKm: 500, maxYears: 5, limit: 10 }),
@@ -52,13 +55,8 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, onSea
     () => findReferencedPublications(kase, allCases),
     [kase, allCases],
   );
-  // How many files name each figure — drives the chip counts and powers the
-  // "click to find co-occurring files" navigation.
-  const peopleCounts = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const c of allCases) for (const p of c.people || []) m.set(p, (m.get(p) || 0) + 1);
-    return m;
-  }, [allCases]);
+  // People/authors this record connects to in the cross-dataset registry.
+  const entities = entityIndex ? entityIndex.forCase(kase) : [];
   return (
     <Box
       sx={{
@@ -194,8 +192,8 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, onSea
             </>
           )}
 
-          {/* Key figures — extracted from the document's entity metadata */}
-          {kase.people && kase.people.length > 0 && onSearch && (
+          {/* People — cross-dataset figures/authors; click opens the entity panel */}
+          {entities.length > 0 && onEntity && (
             <>
               <Divider sx={{ my: 1 }} />
               <Box>
@@ -204,31 +202,28 @@ export function CasePanel({ kase, allCases, onSelect, onClose, onCollapse, onSea
                   color="text.secondary"
                   sx={{ textTransform: "uppercase", letterSpacing: "0.08em", display: "block", mb: 1 }}
                 >
-                  Key figures
+                  {kase.dataset === "publication" ? "Authors" : "Key figures"}
                 </Typography>
                 <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-                  {kase.people.map((name) => {
-                    const n = peopleCounts.get(name) || 1;
-                    return (
-                      <Chip
-                        key={name}
-                        size="small"
-                        label={n > 1 ? `${name} · ${n}` : name}
-                        onClick={() => onSearch(name)}
-                        sx={{
-                          bgcolor: "rgba(154,165,177,0.14)",
-                          color: "#cdd5df",
-                          border: "1px solid rgba(154,165,177,0.4)",
-                          cursor: "pointer",
-                          maxWidth: "100%",
-                          "&:hover": { bgcolor: "rgba(154,165,177,0.24)" },
-                        }}
-                      />
-                    );
-                  })}
+                  {entities.map((e) => (
+                    <Chip
+                      key={e.id}
+                      size="small"
+                      label={e.caseIds.length > 1 ? `${e.name} · ${e.caseIds.length}` : e.name}
+                      onClick={() => onEntity(e.id)}
+                      sx={{
+                        bgcolor: "rgba(154,165,177,0.14)",
+                        color: "#cdd5df",
+                        border: "1px solid rgba(154,165,177,0.4)",
+                        cursor: "pointer",
+                        maxWidth: "100%",
+                        "&:hover": { bgcolor: "rgba(154,165,177,0.24)" },
+                      }}
+                    />
+                  ))}
                 </Stack>
                 <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.75 }}>
-                  Click a name to find other files that reference them.
+                  Click a name to see everywhere they appear.
                 </Typography>
               </Box>
             </>

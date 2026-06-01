@@ -47,4 +47,7 @@ export type Case = {
   /** Key figures extracted from the source document's entity metadata
    * (STARGATE only). Populated at load time from stargate-people.json. */
   people?: string[];
+  /** Author(s) of a published work (publication dataset), kept structured so
+   * initialed names ("J. B. Rhine") resolve cleanly in the entity registry. */
+  author?: string;
 };

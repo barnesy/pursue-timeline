@@ -36,6 +36,7 @@ type Case = {
   dvidsVideoId: string;
   imageUrl: string;
   imageAlt: string;
+  author?: string;
 };
 
 // Approximate centroids for the catalog's free-text locations, keyed by the
@@ -245,6 +246,7 @@ async function main() {
       dvidsVideoId: "",
       imageUrl: "",
       imageAlt: "",
+      author: s(r["Author"]) || undefined,
     });
   }
 

@@ -16,7 +16,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Leslie Kean"
   },
   {
     "dataset": "publication",
@@ -35,7 +36,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "J. Allen Hynek"
   },
   {
     "dataset": "publication",
@@ -54,7 +56,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Edward U. Condon / Univ. of Colorado"
   },
   {
     "dataset": "publication",
@@ -73,7 +76,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "US Air Force"
   },
   {
     "dataset": "publication",
@@ -92,7 +96,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "SCU (various)"
   },
   {
     "dataset": "publication",
@@ -111,7 +116,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Peter Sturrock et al."
   },
   {
     "dataset": "publication",
@@ -130,7 +136,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "US DoD (AARO)"
   },
   {
     "dataset": "publication",
@@ -149,7 +156,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Luis Elizondo"
   },
   {
     "dataset": "publication",
@@ -168,7 +176,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "James M. McCampbell"
   },
   {
     "dataset": "publication",
@@ -187,7 +196,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Russell Targ & Harold Puthoff"
   },
   {
     "dataset": "publication",
@@ -206,7 +216,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Harold Puthoff & Russell Targ"
   },
   {
     "dataset": "publication",
@@ -225,7 +236,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Sheila Ostrander & Lynn Schroeder"
   },
   {
     "dataset": "publication",
@@ -244,7 +256,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "J. B. Rhine"
   },
   {
     "dataset": "publication",
@@ -263,7 +276,8 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Upton Sinclair"
   },
   {
     "dataset": "publication",
@@ -282,6 +296,7 @@
     "videoTitle": "",
     "dvidsVideoId": "",
     "imageUrl": "",
-    "imageAlt": ""
+    "imageAlt": "",
+    "author": "Russell Targ & Harold Puthoff"
   }
 ]

@@ -42,6 +42,8 @@ import { HotspotsPanel } from "./HotspotsPanel";
 import { CasesOverlay } from "./CasesOverlay";
 import { useCaseIds } from "./collection";
 import { useUnits, unitsStore } from "./units";
+import { buildEntityIndex } from "./entities";
+import { EntityPanel } from "./EntityPanel";
 import {
   DATASETS,
   DATASET_IDS,
@@ -269,6 +271,9 @@ export function App() {
   const [cases, setCases] = useState<Case[] | null>(null);
   const caseIds = useCaseIds();
   const units = useUnits();
+  const [focusedEntityId, setFocusedEntityId] = useState<string | null>(null);
+  // Cross-dataset people registry (Stargate figures + publication authors).
+  const entityIndex = useMemo(() => buildEntityIndex(cases ?? []), [cases]);
   const [casesOpen, setCasesOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
@@ -1191,7 +1196,8 @@ export function App() {
                     onSelect={setSelected}
                     onClose={() => setSelected(null)}
                     onCollapse={() => detailPanelRef.current?.collapse()}
-                    onSearch={setSearchTerm}
+                    entityIndex={entityIndex}
+                    onEntity={setFocusedEntityId}
                   />
                 </Panel>
               </>
@@ -1245,10 +1251,8 @@ export function App() {
                     setMobileDrawer(null);
                   }}
                   onCollapse={() => setMobileDrawer(null)}
-                  onSearch={(t) => {
-                    setSearchTerm(t);
-                    setMobileDrawer(null);
-                  }}
+                  entityIndex={entityIndex}
+                  onEntity={setFocusedEntityId}
                 />
               )}
             </Drawer>
@@ -1265,6 +1269,17 @@ export function App() {
           setSelected(c);
         }}
       />
+      {focusedEntityId && entityIndex.byId.get(focusedEntityId) && (
+        <EntityPanel
+          entity={entityIndex.byId.get(focusedEntityId)!}
+          allCases={cases ?? []}
+          onClose={() => setFocusedEntityId(null)}
+          onSelect={(c) => {
+            setFocusedEntityId(null);
+            setSelected(c);
+          }}
+        />
+      )}
     </Box>
   );
 }
