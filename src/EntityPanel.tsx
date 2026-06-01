@@ -12,6 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import type { Case } from "./types";
+import { useMobile } from "./useMobile";
 import type { Entity } from "./entities";
 import { DATASETS, DATASET_IDS, type DatasetId } from "./datasets";
 import { CaseRow } from "./CaseList";
@@ -27,6 +28,7 @@ export function EntityPanel({
   onSelect: (c: Case) => void;
   onClose: () => void;
 }) {
+  const fullScreen = useMobile();
   const byId = useMemo(() => new Map(allCases.map((c) => [c.id, c])), [allCases]);
 
   const groups = useMemo(() => {
@@ -66,16 +68,20 @@ export function EntityPanel({
       open
       onClose={onClose}
       maxWidth={false}
+      fullScreen={fullScreen}
+      aria-label={`${entity.name} — entity`}
       slotProps={{
         paper: {
-          sx: {
-            bgcolor: "#0d1117",
-            border: "1px solid rgba(255,255,255,0.12)",
-            width: "min(560px, 94vw)",
-            maxWidth: "94vw",
-            height: "min(78vh, 760px)",
-            m: 1,
-          },
+          sx: fullScreen
+            ? { bgcolor: "#0d1117" }
+            : {
+                bgcolor: "#0d1117",
+                border: "1px solid rgba(255,255,255,0.12)",
+                width: "min(560px, 94vw)",
+                maxWidth: "94vw",
+                height: "min(78vh, 760px)",
+                m: 1,
+              },
         },
       }}
     >

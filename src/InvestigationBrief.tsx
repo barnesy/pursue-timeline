@@ -27,6 +27,7 @@ import { buildBrief, type BriefPair } from "./brief";
 import { EvidencePanel } from "./EvidencePanel";
 import { datasetColor } from "./datasets";
 import { investigationsStore, encodeInvestigation } from "./investigations";
+import { useMobile } from "./useMobile";
 
 export function InvestigationBrief({
   open, onClose, cases, corpusStats, onSelect,
@@ -37,6 +38,7 @@ export function InvestigationBrief({
   corpusStats: CorpusStats | null;
   onSelect: (c: Case) => void;
 }) {
+  const fullScreen = useMobile();
   const [title, setTitle] = useState("Untitled investigation");
   const [toast, setToast] = useState<string | null>(null);
   const brief = useMemo(() => buildBrief(title, cases, corpusStats), [title, cases, corpusStats]);
@@ -56,10 +58,12 @@ export function InvestigationBrief({
       open={open}
       onClose={onClose}
       maxWidth={false}
-      slotProps={{ paper: { sx: { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(820px, 96vw)", maxWidth: "96vw", height: "min(92vh, 1000px)", m: 1 } } }}
+      fullScreen={fullScreen}
+      aria-label="Investigation Brief"
+      slotProps={{ paper: { sx: fullScreen ? { bgcolor: "#0d1117" } : { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(820px, 96vw)", maxWidth: "96vw", height: "min(92vh, 1000px)", m: 1 } } }}
     >
       {/* Toolbar (not printed) */}
-      <Box className="brief-toolbar" sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+      <Box className="brief-toolbar" sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap" }}>
         <Typography sx={{ fontWeight: 800, fontSize: 15, flexShrink: 0 }}>Investigation Brief</Typography>
         <TextField
           size="small" variant="standard" value={title}

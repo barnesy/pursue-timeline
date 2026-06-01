@@ -13,14 +13,18 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import GavelOutlinedIcon from "@mui/icons-material/GavelOutlined";
 import BalanceOutlinedIcon from "@mui/icons-material/BalanceOutlined";
 import type { Hypothesis } from "./hypothesis";
+import { useMobile } from "./useMobile";
 
 export function HypothesisCard({ hyp, onClose }: { hyp: Hypothesis; onClose: () => void }) {
+  const fullScreen = useMobile();
   return (
     <Dialog
       open
       onClose={onClose}
       maxWidth={false}
-      slotProps={{ paper: { sx: { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(560px, 94vw)", maxWidth: "94vw", m: 1 } } }}
+      fullScreen={fullScreen}
+      aria-label="Hypothesis test"
+      slotProps={{ paper: { sx: fullScreen ? { bgcolor: "#0d1117" } : { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(560px, 94vw)", maxWidth: "94vw", m: 1 } } }}
     >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.25, px: 2.5, py: 1.75, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>

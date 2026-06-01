@@ -26,6 +26,7 @@ import { explainPair } from "./evidence";
 import { EvidencePanel } from "./EvidencePanel";
 import { buildHypothesis } from "./hypothesis";
 import { CorpusDashboard } from "./CorpusDashboard";
+import { useMobile } from "./useMobile";
 
 type Props = {
   open: boolean;
@@ -46,6 +47,7 @@ const KIND_LABEL: Record<ConnKind, string> = { people: "Shared people", places: 
 type SortKey = "score" | "verdict";
 
 export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSelect }: Props) {
+  const fullScreen = useMobile();
   const byId = useMemo(() => new Map(allCases.map((c) => [c.id, c])), [allCases]);
   const [tab, setTab] = useState<"overview" | "links">("overview");
   const [kind, setKind] = useState<ConnKind | "all">("all");
@@ -116,7 +118,9 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
       open={open}
       onClose={onClose}
       maxWidth={false}
-      slotProps={{ paper: { sx: { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(960px, 96vw)", maxWidth: "96vw", height: "min(90vh, 920px)", m: 1 } } }}
+      fullScreen={fullScreen}
+      aria-label="Connections Explorer"
+      slotProps={{ paper: { sx: fullScreen ? { bgcolor: "#0d1117" } : { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(960px, 96vw)", maxWidth: "96vw", height: "min(90vh, 920px)", m: 1 } } }}
     >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap" }}>
@@ -166,7 +170,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
       <>
       {/* Filter bar */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1, borderBottom: "1px solid rgba(255,255,255,0.06)", flexWrap: "wrap" }}>
-        <Stack direction="row" spacing={0.75}>
+        <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
           {(["all", "people", "places", "content"] as const).map((k) => (
             <Chip
               key={k}
@@ -183,7 +187,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
           ))}
         </Stack>
         <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 200 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: { xs: "100%", sm: 200 } }}>
           <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", fontFamily: "JetBrains Mono, monospace" }}>
             min score <b style={{ color: "#e6ecf2" }}>{minScore.toFixed(2)}</b>
           </Typography>

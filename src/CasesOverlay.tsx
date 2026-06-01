@@ -29,6 +29,7 @@ import { fmtDistance } from "./blastPhysics";
 import { useUnits } from "./units";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { casesStore, useCaseIds } from "./collection";
+import { useMobile } from "./useMobile";
 import { CaseGraph } from "./CaseGraph";
 import type { EntityIndex, Entity } from "./entities";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -56,6 +57,7 @@ type Link = { a: Pt; b: Pt; km: number; days: number; score: number };
 export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, onEntity, onGenerateBrief }: Props) {
   const ids = useCaseIds();
   const units = useUnits();
+  const fullScreen = useMobile();
   const [maxKm, setMaxKm] = useState(500);
   const [maxYears, setMaxYears] = useState(5);
   const [leftView, setLeftView] = useState<"map" | "graph">("map");
@@ -112,7 +114,9 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
       open={open}
       onClose={onClose}
       maxWidth={false}
-      slotProps={{ paper: { sx: { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(1400px, 95vw)", maxWidth: "95vw", height: "min(88vh, 880px)", m: 1 } } }}
+      fullScreen={fullScreen}
+      aria-label="Your Cases"
+      slotProps={{ paper: { sx: fullScreen ? { bgcolor: "#0d1117" } : { bgcolor: "#0d1117", border: "1px solid rgba(255,255,255,0.12)", width: "min(1400px, 95vw)", maxWidth: "95vw", height: "min(88vh, 880px)", m: 1 } } }}
     >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap" }}>
@@ -139,9 +143,10 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
           </Box>
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
-          {/* LEFT rail — two-up vertical: map (top) + timeline (bottom) */}
-          <Box sx={{ width: { xs: 240, md: 320 }, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.08)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, flexGrow: 1, minHeight: 0, overflowY: { xs: "auto", md: "visible" } }}>
+          {/* LEFT rail — two-up vertical: map (top) + timeline (bottom). Becomes
+              a full-width top section on mobile (stacked above the case cards). */}
+          <Box sx={{ width: { xs: "100%", md: 320 }, flexShrink: 0, borderRight: { md: "1px solid rgba(255,255,255,0.08)" }, borderBottom: { xs: "1px solid rgba(255,255,255,0.08)", md: "none" }, display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box sx={{ flex: "1 1 auto", minHeight: 180, display: "flex", flexDirection: "column", p: 1.5 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Label sx={{ flexGrow: 1 }}>{leftView === "map" ? "MAP — fit to all · links = pairs" : "NETWORK — shared people & places"}</Label>
