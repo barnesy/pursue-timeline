@@ -6,3 +6,6 @@ data/raw/*.html
 .env
 .env.local
 .DS_Store
+
+# Transient Claude scheduled-tasks lock
+.claude/scheduled_tasks.lock
