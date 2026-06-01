@@ -30,6 +30,35 @@
 
       /* Hide focus ring on mouse clicks (only show for keyboard nav). */
       :focus:not(:focus-visible) { outline: none; }
+
+      /* ── Investigation Brief: print-to-PDF ────────────────────────────────
+         When printing, hide the whole app EXCEPT the brief body, drop it to a
+         clean white page with selectable vector text, and keep our accent
+         colors (print engines strip backgrounds without color-adjust). */
+      @media print {
+        body { background: #fff !important; color: #111 !important; }
+        /* hide everything, then reveal only the brief print root */
+        body * { visibility: hidden !important; }
+        #brief-print-root, #brief-print-root * { visibility: visible !important; }
+        #brief-print-root {
+          position: absolute !important;
+          left: 0; top: 0; width: 100%;
+          max-height: none !important; overflow: visible !important;
+          color: #111 !important;
+          padding: 0 !important;
+        }
+        /* MUI dark dialog chrome → invisible/white for print */
+        .MuiDialog-paper, .MuiBackdrop-root { background: #fff !important; box-shadow: none !important; border: none !important; }
+        .brief-toolbar, .MuiSnackbar-root { display: none !important; }
+        /* recolor text that was light-on-dark to dark-on-white */
+        #brief-print-root .MuiTypography-root { color: #1a1a1a !important; }
+        /* keep colored accents legible on white */
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        #brief-print-root * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .brief-section { break-inside: avoid; }
+        .brief-row { break-inside: avoid; }
+        @page { margin: 1.6cm; }
+      }
     </style>
   </head>
   <body>

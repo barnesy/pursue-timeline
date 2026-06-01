@@ -41,6 +41,9 @@ import { CasePanel } from "./CaseDrawer";
 import { HotspotsPanel } from "./HotspotsPanel";
 import { CasesOverlay } from "./CasesOverlay";
 import { ConnectionsExplorer } from "./ConnectionsExplorer";
+import { InvestigationBrief } from "./InvestigationBrief";
+import { readSharedFromHash } from "./investigations";
+import { casesStore } from "./collection";
 import { useCaseIds } from "./collection";
 import { useUnits, unitsStore } from "./units";
 import { buildEntityIndex } from "./entities";
@@ -283,11 +286,22 @@ export function App() {
   useEffect(() => {
     loadCorpusStats(import.meta.env.BASE_URL).then(setCorpusStats);
   }, []);
+  // A shared investigation link (#inv=...) hydrates the Cases collection and
+  // opens the brief — turning a URL into a reproducible investigation.
+  useEffect(() => {
+    const shared = readSharedFromHash();
+    if (shared && shared.caseIds.length) {
+      shared.caseIds.forEach((id) => casesStore.add(id));
+      setBriefOpen(true);
+      try { history.replaceState(null, "", location.pathname + location.search); } catch { /* ignore */ }
+    }
+  }, []);
   // Lazy-load the MiniSearch index on first keystroke; a bump re-runs the
   // search memo once it's ready so ranked results replace the substring fallback.
   const [searchReadyTick, setSearchReadyTick] = useState(0);
   const [casesOpen, setCasesOpen] = useState(false);
   const [connectionsOpen, setConnectionsOpen] = useState(false);
+  const [briefOpen, setBriefOpen] = useState(false);
   const [activeAgencies, setActiveAgencies] = useState<Set<string>>(new Set());
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
   const [activeDatasets, setActiveDatasets] = useState<Set<DatasetId>>(
@@ -1335,6 +1349,7 @@ export function App() {
         allCases={cases ?? []}
         entityIndex={entityIndex}
         onEntity={setFocusedEntityId}
+        onGenerateBrief={() => { setCasesOpen(false); setBriefOpen(true); }}
         onSelect={(c) => {
           setCasesOpen(false);
           setSelected(c);
@@ -1347,6 +1362,17 @@ export function App() {
         corpusStats={corpusStats}
         onSelect={(c) => {
           setConnectionsOpen(false);
+          setSelected(c);
+        }}
+      />
+      <InvestigationBrief
+        open={briefOpen}
+        onClose={() => setBriefOpen(false)}
+        cases={(cases ?? []).filter((c) => caseIds.includes(c.id))}
+        corpusStats={corpusStats}
+        onSelect={(c) => {
+          setBriefOpen(false);
+          setCasesOpen(false);
           setSelected(c);
         }}
       />

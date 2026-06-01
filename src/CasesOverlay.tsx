@@ -18,6 +18,7 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { scaleTime } from "d3-scale";
 import type { Case } from "./types";
@@ -43,6 +44,7 @@ type Props = {
   onSelect: (c: Case) => void;
   entityIndex: EntityIndex;
   onEntity?: (entityId: string) => void;
+  onGenerateBrief?: () => void;
 };
 
 // A person/place shared by two or more of the collected cases.
@@ -51,7 +53,7 @@ type SharedEntity = { entity: Entity; idxs: number[] };
 type Pt = { i: number; c: Case; ll: { lat: number; lng: number } | null; t: number | null };
 type Link = { a: Pt; b: Pt; km: number; days: number; score: number };
 
-export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, onEntity }: Props) {
+export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, onEntity, onGenerateBrief }: Props) {
   const ids = useCaseIds();
   const units = useUnits();
   const [maxKm, setMaxKm] = useState(500);
@@ -122,6 +124,9 @@ export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, o
         <Box sx={{ flexGrow: 1 }} />
         <Slider2 label="distance ≤" value={maxKm} min={25} max={2000} step={25} unit="km" displayValue={fmtDistance(maxKm * 1000, units)} onChange={setMaxKm} />
         <Slider2 label="time ≤" value={maxYears} min={1} max={20} step={1} unit="yr" onChange={setMaxYears} />
+        {onGenerateBrief && cases.length > 0 && (
+          <Button size="small" variant="contained" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />} onClick={onGenerateBrief} sx={{ textTransform: "none", color: "#0a0d12" }}>Generate Brief</Button>
+        )}
         <Button size="small" startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />} onClick={() => casesStore.clear()} sx={{ textTransform: "none", color: "text.secondary" }}>Clear</Button>
         <IconButton size="small" onClick={onClose} aria-label="Close"><CloseIcon fontSize="small" /></IconButton>
       </Box>
