@@ -1264,6 +1264,8 @@ export function App() {
         open={casesOpen}
         onClose={() => setCasesOpen(false)}
         allCases={cases ?? []}
+        entityIndex={entityIndex}
+        onEntity={setFocusedEntityId}
         onSelect={(c) => {
           setCasesOpen(false);
           setSelected(c);

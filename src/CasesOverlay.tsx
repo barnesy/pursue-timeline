@@ -10,6 +10,7 @@
 import { useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
 import IconButton from "@mui/material/IconButton";
@@ -27,6 +28,9 @@ import { fmtDistance } from "./blastPhysics";
 import { useUnits } from "./units";
 import { YieldSparkline, AltitudeSparkline } from "./Sparklines";
 import { casesStore, useCaseIds } from "./collection";
+import type { EntityIndex, Entity } from "./entities";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 
 const MS_DAY = 86_400_000;
 const dotColor = (c: Case) => AGENCY_COLORS[c.agency] || DATASETS[c.dataset]?.color || "#7ab8ff";
@@ -36,12 +40,17 @@ type Props = {
   onClose: () => void;
   allCases: Case[];
   onSelect: (c: Case) => void;
+  entityIndex: EntityIndex;
+  onEntity?: (entityId: string) => void;
 };
+
+// A person/place shared by two or more of the collected cases.
+type SharedEntity = { entity: Entity; idxs: number[] };
 
 type Pt = { i: number; c: Case; ll: { lat: number; lng: number } | null; t: number | null };
 type Link = { a: Pt; b: Pt; km: number; days: number; score: number };
 
-export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
+export function CasesOverlay({ open, onClose, allCases, onSelect, entityIndex, onEntity }: Props) {
   const ids = useCaseIds();
   const units = useUnits();
   const [maxKm, setMaxKm] = useState(500);
@@ -75,6 +84,22 @@ export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
     return out.sort((x, y) => x.score - y.score);
   }, [pts, maxKm, maxYears]);
 
+  // Network correlations: entities (people / places) shared by ≥2 collected
+  // cases — the cross-dataset connective tissue the proximity links can't see.
+  const shared: SharedEntity[] = useMemo(() => {
+    const m = new Map<string, SharedEntity>();
+    for (const p of pts) {
+      for (const e of entityIndex.forCase(p.c)) {
+        const cur = m.get(e.id) || { entity: e, idxs: [] };
+        if (!cur.idxs.includes(p.i)) cur.idxs.push(p.i);
+        m.set(e.id, cur);
+      }
+    }
+    return [...m.values()]
+      .filter((x) => x.idxs.length >= 2)
+      .sort((a, b) => b.idxs.length - a.idxs.length);
+  }, [pts, entityIndex]);
+
   const times = pts.map((p) => p.t).filter((t): t is number => t != null);
   const span = times.length > 1 ? `${new Date(Math.min(...times)).getUTCFullYear()}–${new Date(Math.max(...times)).getUTCFullYear()}` : times.length === 1 ? `${new Date(times[0]).getUTCFullYear()}` : "—";
 
@@ -89,7 +114,8 @@ export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap" }}>
         <Typography sx={{ fontWeight: 800, fontSize: 15 }}>🗂 Your Cases · {cases.length}</Typography>
         <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace" }}>
-          {span} · <b style={{ color: "#ffb454" }}>{links.length}</b> correlation{links.length === 1 ? "" : "s"}
+          {span} · <b style={{ color: "#ffb454" }}>{links.length}</b> proximity ·{" "}
+          <b style={{ color: "#7aa7d6" }}>{shared.length}</b> shared
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
         <Slider2 label="distance ≤" value={maxKm} min={25} max={2000} step={25} unit="km" displayValue={fmtDistance(maxKm * 1000, units)} onChange={setMaxKm} />
@@ -116,6 +142,20 @@ export function CasesOverlay({ open, onClose, allCases, onSelect }: Props) {
             <Box sx={{ flexShrink: 0, p: 1.5, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <Label>TIMELINE — these {cases.length} cases</Label>
               <Box sx={{ mt: 0.5 }}><MiniTimeline pts={pts} /></Box>
+            </Box>
+            <Box sx={{ flexShrink: 0, p: 1.5, borderTop: "1px solid rgba(255,255,255,0.08)", maxHeight: 220, overflowY: "auto" }}>
+              <Label>SHARED CONNECTIONS — {shared.length}</Label>
+              {shared.length === 0 ? (
+                <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 0.5 }}>
+                  No shared people or places yet — collect cases that overlap.
+                </Typography>
+              ) : (
+                <Stack spacing={0.75} sx={{ mt: 0.75 }}>
+                  {shared.map((s) => (
+                    <SharedRow key={s.entity.id} s={s} pts={pts} onEntity={onEntity} />
+                  ))}
+                </Stack>
+              )}
             </Box>
           </Box>
 
@@ -221,6 +261,57 @@ function CaseCard({ pt, links, onOpen }: { pt: Pt; links: Link[]; onOpen: (c: Ca
 }
 
 // --- header slider -----------------------------------------------------------
+
+// One shared entity (person/place) + the numbered badges of the collected
+// cases that share it — the network "edge" rendered compactly.
+function SharedRow({ s, pts, onEntity }: { s: SharedEntity; pts: Pt[]; onEntity?: (id: string) => void }) {
+  const byIdx = new Map(pts.map((p) => [p.i, p]));
+  const isPlace = s.entity.type === "place";
+  const Icon = isPlace ? PlaceOutlinedIcon : PersonOutlineIcon;
+  return (
+    <Box
+      onClick={onEntity ? () => onEntity(s.entity.id) : undefined}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        p: 0.5,
+        borderRadius: 1,
+        cursor: onEntity ? "pointer" : "default",
+        "&:hover": onEntity ? { bgcolor: "rgba(255,255,255,0.04)" } : undefined,
+      }}
+    >
+      <Icon sx={{ fontSize: 15, color: isPlace ? "#7aa7d6" : "#9aa5b1", flexShrink: 0 }} />
+      <Typography variant="caption" sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {s.entity.name}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 0.25, flexShrink: 0 }}>
+        {s.idxs.map((i) => {
+          const c = byIdx.get(i)?.c;
+          return (
+            <Box
+              key={i}
+              sx={{
+                width: 16,
+                height: 16,
+                borderRadius: "50%",
+                bgcolor: c ? dotColor(c) : "#555",
+                color: "#0a0d12",
+                fontSize: 9,
+                fontWeight: 800,
+                fontFamily: "JetBrains Mono, monospace",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              {i}
+            </Box>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+}
 
 function Slider2({ label, value, min, max, step, unit, displayValue, onChange }: { label: string; value: number; min: number; max: number; step: number; unit: string; displayValue?: string; onChange: (v: number) => void }) {
   return (
