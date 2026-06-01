@@ -27,6 +27,7 @@ import Drawer from "@mui/material/Drawer";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
 import Badge from "@mui/material/Badge";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from "react-resizable-panels";
@@ -42,6 +43,7 @@ import { HotspotsPanel } from "./HotspotsPanel";
 import { CasesOverlay } from "./CasesOverlay";
 import { ConnectionsExplorer } from "./ConnectionsExplorer";
 import { InvestigationBrief } from "./InvestigationBrief";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { readSharedFromHash } from "./investigations";
 import { casesStore } from "./collection";
 import { useCaseIds } from "./collection";
@@ -321,6 +323,8 @@ export function App() {
   );
   const [selected, setSelected] = useState<Case | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Non-fatal: datasets that failed to load while others succeeded.
+  const [loadWarning, setLoadWarning] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("timeline");
   const [xDomain, setXDomain] = useState<[Date, Date] | null>(null);
   // Lifted from MapView so timeline + map can both react to the same focus.
@@ -403,34 +407,29 @@ export function App() {
   }, [selected?.id]);
 
   useEffect(() => {
-    const datasetsP = Promise.all(
+    const normalize = (src: (typeof DATASET_SOURCES)[number], raw: Omit<Case, "dataset">[]): Case[] =>
+      raw.map((c) => {
+        // For non-UAP datasets, collapse detailed `type` strings (UNDERGROUND
+        // SHAFT, BROKEN ARROW, etc.) into the catch-all "PDF" so the MEDIA
+        // filter row stays focused on the 4 primary media types. The original
+        // type is preserved as `subtype` — unless the record already carries
+        // its own `subtype` (Stargate/physics/catalog), which we keep.
+        if (src.id !== "uap") {
+          return { ...c, dataset: src.id, subtype: c.subtype ?? c.type, type: "PDF" } as Case;
+        }
+        return { ...c, dataset: src.id } as Case;
+      });
+
+    // Load each dataset independently: one bad/missing file degrades to "N of 7
+    // loaded" rather than blanking everything. Only a TOTAL failure is fatal.
+    const datasetsP = Promise.allSettled(
       DATASET_SOURCES.map((src) =>
         fetch(`${import.meta.env.BASE_URL}${src.url}`)
           .then((r) => {
             if (!r.ok) throw new Error(`${src.id}: HTTP ${r.status}`);
             return r.json();
           })
-          .then((raw: Omit<Case, "dataset">[]) =>
-            raw.map((c) => {
-              // For non-UAP datasets, collapse detailed `type` strings
-              // (UNDERGROUND SHAFT, BROKEN ARROW, etc.) into the catch-all
-              // "PDF" so the MEDIA filter row stays focused on the 4 primary
-              // media types. The original type is preserved as `subtype`
-              // and surfaced in the detail panel — unless the record already
-              // carries its own `subtype` (Stargate, nuclear-physics, uap-
-              // catalog ship a meaningful category there), which we keep so it
-              // isn't clobbered by the otherwise-redundant "PDF" type.
-              if (src.id !== "uap") {
-                return {
-                  ...c,
-                  dataset: src.id,
-                  subtype: c.subtype ?? c.type,
-                  type: "PDF",
-                };
-              }
-              return { ...c, dataset: src.id };
-            }),
-          ),
+          .then((raw: Omit<Case, "dataset">[]) => ({ src, cases: normalize(src, raw) })),
       ),
     );
     // Key-figure entity map for STARGATE docs (best-effort; absent → no chips).
@@ -440,7 +439,18 @@ export function App() {
       .then((r) => (r.ok ? r.json() : {}))
       .catch(() => ({}));
     Promise.all([datasetsP, peopleP])
-      .then(([perDataset, people]) => {
+      .then(([settled, people]) => {
+        const failed = settled
+          .map((s, i) => (s.status === "rejected" ? String(DATASET_SOURCES[i].id) : null))
+          .filter((x): x is string => x !== null);
+        const perDataset = settled
+          .filter((s): s is PromiseFulfilledResult<{ src: (typeof DATASET_SOURCES)[number]; cases: Case[] }> => s.status === "fulfilled")
+          .map((s) => s.value.cases);
+        if (perDataset.length === 0) {
+          setError("Could not load any dataset. Check your connection and reload.");
+          return;
+        }
+        if (failed.length) setLoadWarning(`${failed.length} dataset${failed.length === 1 ? "" : "s"} failed to load (${failed.join(", ")}). Showing the rest.`);
         const data: Case[] = perDataset
           .flat()
           .map((c) => {
@@ -1201,8 +1211,12 @@ export function App() {
           </Box>
         )}
         {error && (
-          <Box sx={{ p: 4 }}>
-            <Typography color="error">Failed to load cases.json: {error}</Typography>
+          <Box sx={{ display: "grid", placeItems: "center", height: "100%", p: 4, textAlign: "center" }}>
+            <Box sx={{ maxWidth: 420 }}>
+              <Typography color="error" sx={{ fontWeight: 700, mb: 1 }}>Failed to load data</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{error}</Typography>
+              <Button size="small" variant="outlined" onClick={() => location.reload()}>Reload</Button>
+            </Box>
           </Box>
         )}
         {cases && !isMobile && (
@@ -1343,39 +1357,45 @@ export function App() {
         )}
       </Box>
 
-      <CasesOverlay
-        open={casesOpen}
-        onClose={() => setCasesOpen(false)}
-        allCases={cases ?? []}
-        entityIndex={entityIndex}
-        onEntity={setFocusedEntityId}
-        onGenerateBrief={() => { setCasesOpen(false); setBriefOpen(true); }}
-        onSelect={(c) => {
-          setCasesOpen(false);
-          setSelected(c);
-        }}
-      />
-      <ConnectionsExplorer
-        open={connectionsOpen}
-        onClose={() => setConnectionsOpen(false)}
-        allCases={cases ?? []}
-        corpusStats={corpusStats}
-        onSelect={(c) => {
-          setConnectionsOpen(false);
-          setSelected(c);
-        }}
-      />
-      <InvestigationBrief
-        open={briefOpen}
-        onClose={() => setBriefOpen(false)}
-        cases={(cases ?? []).filter((c) => caseIds.includes(c.id))}
-        corpusStats={corpusStats}
-        onSelect={(c) => {
-          setBriefOpen(false);
-          setCasesOpen(false);
-          setSelected(c);
-        }}
-      />
+      <ErrorBoundary label="Cases">
+        <CasesOverlay
+          open={casesOpen}
+          onClose={() => setCasesOpen(false)}
+          allCases={cases ?? []}
+          entityIndex={entityIndex}
+          onEntity={setFocusedEntityId}
+          onGenerateBrief={() => { setCasesOpen(false); setBriefOpen(true); }}
+          onSelect={(c) => {
+            setCasesOpen(false);
+            setSelected(c);
+          }}
+        />
+      </ErrorBoundary>
+      <ErrorBoundary label="Connections Explorer">
+        <ConnectionsExplorer
+          open={connectionsOpen}
+          onClose={() => setConnectionsOpen(false)}
+          allCases={cases ?? []}
+          corpusStats={corpusStats}
+          onSelect={(c) => {
+            setConnectionsOpen(false);
+            setSelected(c);
+          }}
+        />
+      </ErrorBoundary>
+      <ErrorBoundary label="Investigation Brief">
+        <InvestigationBrief
+          open={briefOpen}
+          onClose={() => setBriefOpen(false)}
+          cases={(cases ?? []).filter((c) => caseIds.includes(c.id))}
+          corpusStats={corpusStats}
+          onSelect={(c) => {
+            setBriefOpen(false);
+            setCasesOpen(false);
+            setSelected(c);
+          }}
+        />
+      </ErrorBoundary>
       {focusedEntityId && entityIndex.byId.get(focusedEntityId) && (
         <EntityPanel
           entity={entityIndex.byId.get(focusedEntityId)!}
@@ -1387,6 +1407,13 @@ export function App() {
           }}
         />
       )}
+      <Snackbar
+        open={!!loadWarning}
+        autoHideDuration={6000}
+        onClose={() => setLoadWarning(null)}
+        message={loadWarning || ""}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      />
     </Box>
   );
 }

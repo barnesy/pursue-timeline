@@ -16,7 +16,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import type { Case } from "./types";
-import { DATASETS, type DatasetId } from "./datasets";
+import { DATASETS, datasetColor, type DatasetId } from "./datasets";
 import { NOTABLE_HOTSPOTS, type NotableHotspot } from "./notableHotspots";
 import type { EntityIndex } from "./entities";
 import type { CorpusStats } from "./corpusStats";
@@ -168,9 +168,9 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
                   sx={{ px: 2, py: 0.75, cursor: "pointer", "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.25 }}>
-                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[l.a.dataset].color, flexShrink: 0 }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: datasetColor(l.a.dataset), flexShrink: 0 }} />
                     <Box sx={{ width: 12, borderTop: "1px dashed rgba(255,255,255,0.25)", flexShrink: 0 }} />
-                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[l.b.dataset].color, flexShrink: 0 }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: datasetColor(l.b.dataset), flexShrink: 0 }} />
                     <Typography variant="caption" sx={{ color: "#ffb454", fontFamily: "JetBrains Mono, monospace", flexGrow: 1, textAlign: "right", fontSize: 10 }}>
                       via {l.reason}
                     </Typography>

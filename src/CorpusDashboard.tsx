@@ -15,14 +15,21 @@ import { PLACES } from "./places";
 const PLACE_NAME = new Map(PLACES.map((p) => [p.id, p.name]));
 
 export function CorpusDashboard({ summary }: { summary: CorpusSummary }) {
-  const maxBin = Math.max(1, ...summary.pval.histogram);
+  // Defend against a partial/older corpus-stats.json `summary` (missing pval,
+  // yearRange, linkByKind) so the dashboard degrades instead of throwing.
+  const pval = summary.pval ?? { n: 0, median: 0, histogram: [], significant: 0, weak: 0, coincidental: 0 };
+  const histogram = pval.histogram?.length ? pval.histogram : [];
+  const yearRange = summary.yearRange ?? [0, 0];
+  const linkByKind = summary.linkByKind ?? { people: 0, places: 0, content: 0 };
+  const totalLinks = linkByKind.people + linkByKind.places + linkByKind.content;
+  const maxBin = Math.max(1, ...(histogram.length ? histogram : [1]));
   return (
     <Box sx={{ px: 2, py: 1.5 }}>
       {/* Headline cards */}
       <Stack direction="row" spacing={1.25} sx={{ flexWrap: "wrap", rowGap: 1.25, mb: 2 }}>
-        <Card big label="Documents" value={summary.totalDocs.toLocaleString()} sub={`${summary.yearRange[0]}–${summary.yearRange[1]} · ${summary.datedDocs.toLocaleString()} dated`} />
-        <Card big label="Scored links" value="200" sub={`${summary.linkByKind.people} people · ${summary.linkByKind.places} place · ${summary.linkByKind.content} content`} />
-        <Card big label="UAP↔test tested" value={String(summary.pval.n)} sub={`median p = ${summary.pval.median}`} />
+        <Card big label="Documents" value={summary.totalDocs.toLocaleString()} sub={`${yearRange[0]}–${yearRange[1]} · ${summary.datedDocs.toLocaleString()} dated`} />
+        <Card big label="Scored links" value={String(totalLinks)} sub={`${linkByKind.people} people · ${linkByKind.places} place · ${linkByKind.content} content`} />
+        <Card big label="UAP↔test tested" value={String(pval.n)} sub={`median p = ${pval.median}`} />
       </Stack>
 
       {/* The honesty headline: p-value distribution */}
@@ -31,11 +38,11 @@ export function CorpusDashboard({ summary }: { summary: CorpusSummary }) {
           Are UAP sightings unusually close to nuclear tests?
         </Typography>
         <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5, mb: 1.5, lineHeight: 1.45 }}>
-          For each UAP case, a Monte Carlo test asks how often a random date would land as close to a nuclear test. High p = the closeness is <b style={{ color: "#7a8595" }}>expected</b> given how often tests fired; low p = <b style={{ color: "#e8413a" }}>surprising</b>. The verdict: <b style={{ color: "#e6ecf2" }}>{summary.pval.coincidental} of {summary.pval.n} are coincidental</b>, only <b style={{ color: "#f0a13a" }}>{summary.pval.significant} are significant</b>.
+          For each UAP case, a Monte Carlo test asks how often a random date would land as close to a nuclear test. High p = the closeness is <b style={{ color: "#7a8595" }}>expected</b> given how often tests fired; low p = <b style={{ color: "#e8413a" }}>surprising</b>. The verdict: <b style={{ color: "#e6ecf2" }}>{pval.coincidental} of {pval.n} are coincidental</b>, only <b style={{ color: "#f0a13a" }}>{pval.significant} are significant</b>.
         </Typography>
         {/* histogram */}
         <Box sx={{ display: "flex", alignItems: "flex-end", gap: 0.5, height: 90 }}>
-          {summary.pval.histogram.map((n, i) => {
+          {histogram.map((n, i) => {
             const frac = n / maxBin;
             // color ramp: left bins (low p, surprising) red → right (expected) gray
             const color = i <= 0 ? "#e8413a" : i <= 1 ? "#f0a13a" : i <= 3 ? "#c9b03a" : "#7a8595";

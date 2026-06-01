@@ -25,7 +25,7 @@ import type { Case } from "./types";
 import type { CorpusStats } from "./corpusStats";
 import { buildBrief, type BriefPair } from "./brief";
 import { EvidencePanel } from "./EvidencePanel";
-import { DATASETS } from "./datasets";
+import { datasetColor } from "./datasets";
 import { investigationsStore, encodeInvestigation } from "./investigations";
 
 export function InvestigationBrief({
@@ -141,7 +141,7 @@ export function InvestigationBrief({
               <Stack spacing={0.4}>
                 {brief.cases.map((c) => (
                   <Box key={c.id} className="brief-row" sx={{ display: "flex", gap: 1, alignItems: "center", cursor: "pointer" }} onClick={() => onSelect(c)}>
-                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[c.dataset].color, flexShrink: 0 }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: datasetColor(c.dataset), flexShrink: 0 }} />
                     <Typography variant="body2" sx={{ flexGrow: 1 }}>{c.title}</Typography>
                     <Typography variant="caption" sx={{ color: "text.disabled", fontFamily: "JetBrains Mono, monospace", flexShrink: 0 }}>{c.incidentDateRaw || ""}</Typography>
                   </Box>
@@ -178,11 +178,11 @@ function PairBlock({ pair, onSelect }: { pair: BriefPair; onSelect: (c: Case) =>
   return (
     <Box className="brief-row" sx={{ p: 1.25, borderRadius: 1.5, border: "1px solid rgba(255,255,255,0.08)" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-        <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[pair.a.dataset].color }} />
+        <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: datasetColor(pair.a.dataset) }} />
         <Typography variant="body2" sx={{ fontWeight: 600, cursor: "pointer" }} onClick={() => onSelect(pair.a)}>{pair.a.title}</Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
-        <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: DATASETS[pair.b.dataset].color }} />
+        <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: datasetColor(pair.b.dataset) }} />
         <Typography variant="body2" sx={{ fontWeight: 600, cursor: "pointer" }} onClick={() => onSelect(pair.b)}>{pair.b.title}</Typography>
         <Box sx={{ flexGrow: 1 }} />
         <Typography variant="caption" sx={{ color: pair.hyp.verdict.color, fontWeight: 700, flexShrink: 0 }}>

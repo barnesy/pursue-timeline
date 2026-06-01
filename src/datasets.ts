@@ -112,3 +112,14 @@ export function getDataset(id: DatasetId): Dataset {
 export function datasetHasGeo(id: DatasetId): boolean {
   return DATASETS[id].hasGeo;
 }
+
+// Null-safe accessors — return a sensible fallback for an unexpected dataset id
+// (stale corpus-stats, a renamed/future dataset) instead of throwing on
+// `DATASETS[id].color`, which would white-screen a component.
+const FALLBACK_COLOR = "#7ab8ff";
+export function datasetColor(id: string): string {
+  return DATASETS[id as DatasetId]?.color ?? FALLBACK_COLOR;
+}
+export function datasetShortName(id: string): string {
+  return DATASETS[id as DatasetId]?.shortName ?? id;
+}

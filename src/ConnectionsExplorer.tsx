@@ -20,7 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import HubIcon from "@mui/icons-material/Hub";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import type { Case } from "./types";
-import { DATASETS } from "./datasets";
+import { datasetColor, datasetShortName } from "./datasets";
 import type { CorpusStats, CorpusLink } from "./corpusStats";
 import { explainPair } from "./evidence";
 import { EvidencePanel } from "./EvidencePanel";
@@ -92,7 +92,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
     ];
     for (const r of filtered) {
       lines.push(`## ${r.a.title}  ⇄  ${r.b.title}`);
-      lines.push(`- Datasets: ${DATASETS[r.a.dataset].shortName} ↔ ${DATASETS[r.b.dataset].shortName}`);
+      lines.push(`- Datasets: ${datasetShortName(r.a.dataset)} ↔ ${datasetShortName(r.b.dataset)}`);
       lines.push(`- Verdict: **${r.hyp.verdict.label}** (${Math.round(r.hyp.strength * 100)}/100) · score ${r.link.score.toFixed(2)}`);
       for (const e of r.evidence) lines.push(`- ${e.label}: ${e.detail}`);
       lines.push(``);
@@ -258,7 +258,7 @@ export function ConnectionsExplorer({ open, onClose, allCases, corpusStats, onSe
 }
 
 function Dot({ c }: { c: Case }) {
-  return <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: DATASETS[c.dataset].color, flexShrink: 0 }} />;
+  return <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: datasetColor(c.dataset), flexShrink: 0 }} />;
 }
 
 function download(name: string, content: string, mime: string) {
