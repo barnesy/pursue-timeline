@@ -57,6 +57,13 @@ export const PLACES: Place[] = [
   { id: "cambridge-uk", name: "Cambridge (Cavendish)", lat: 52.2, lng: 0.12, radiusKm: 30, aliases: ["CAMBRIDGE", "CAVENDISH"] },
   // ── Other ───────────────────────────────────────────────────────────
   { id: "washington-dc", name: "Washington, D.C.", lat: 38.9, lng: -77.03, radiusKm: 30, aliases: ["WASHINGTON", "CAPITOL", "CONGRESS", "PENTAGON"] },
+  // ── Region/theater groupings for modern UAP cases ───────────────────
+  // These cases carry only a theater-scale location string; alias-only places
+  // (no radius reliance) group them without asserting a precise site.
+  { id: "centcom-theater", name: "CENTCOM theater (Middle East)", lat: 29.0, lng: 47.0, radiusKm: 0, aliases: ["CENTCOM"] },
+  { id: "arabian-gulf", name: "Arabian Gulf", lat: 26.5, lng: 51.5, radiusKm: 0, aliases: ["ARABIAN GULF", "STRAIT OF HORMUZ", "GULF OF OMAN"] },
+  { id: "western-us", name: "Western United States", lat: 40.0, lng: -114.0, radiusKm: 0, aliases: ["WESTERN UNITED STATES"] },
+  { id: "eastern-med", name: "Eastern Mediterranean", lat: 35.0, lng: 28.0, radiusKm: 0, aliases: ["MEDITERRANEAN", "AEGEAN", "GREECE"] },
 ];
 
 /** Places a record belongs to (by coordinate radius or location-text alias). */
@@ -64,7 +71,11 @@ export function placesFor(c: Case): Place[] {
   const loc = (c.incidentLocation || "").toUpperCase();
   const out: Place[] = [];
   for (const p of PLACES) {
+    // Radius matching only on REAL per-record coords — coarse geocoded points
+    // (approxGeo, e.g. a theater centroid) would wrongly land inside a
+    // site-level radius. Those records still match by location-text alias.
     const byGeo =
+      !c.approxGeo &&
       typeof c.lat === "number" &&
       typeof c.lng === "number" &&
       haversineKm({ lat: c.lat, lng: c.lng }, { lat: p.lat, lng: p.lng }) <= p.radiusKm;

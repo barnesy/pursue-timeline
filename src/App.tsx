@@ -417,7 +417,9 @@ export function App() {
             // of each re-running the geocoder (or, for places.ts, missing them).
             if (typeof withPeople.lat === "number") return withPeople;
             const ll = getLatLng(withPeople);
-            return ll ? { ...withPeople, lat: ll.lat, lng: ll.lng } : withPeople;
+            // Geocoded coords are coarse (theater/region centroid): plot them,
+            // but flag so places.ts won't geo-match them to site-level places.
+            return ll ? { ...withPeople, lat: ll.lat, lng: ll.lng, approxGeo: true } : withPeople;
           });
         setCases(data);
         setActiveAgencies(new Set(data.map((c) => c.agency).filter(Boolean)));

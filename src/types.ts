@@ -50,4 +50,9 @@ export type Case = {
   /** Author(s) of a published work (publication dataset), kept structured so
    * initialed names ("J. B. Rhine") resolve cleanly in the entity registry. */
   author?: string;
+  /** True when lat/lng were filled at load from the coarse string geocoder
+   * (theater/region/country centroid) rather than real per-record coordinates.
+   * Such points are fine for the map but must NOT geo-match site-level places
+   * by radius (would assert e.g. "Western US" UAP cases happened at NTS). */
+  approxGeo?: boolean;
 };
