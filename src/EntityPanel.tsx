@@ -50,6 +50,17 @@ export function EntityPanel({
 
   const total = groups.reduce((n, g) => n + g.cases.length, 0);
 
+  // Active span across all referencing records (years), for quick context.
+  const span = useMemo(() => {
+    const years = groups
+      .flatMap((g) => g.cases)
+      .map((c) => (c.incidentDate ? new Date(c.incidentDate).getUTCFullYear() : null))
+      .filter((y): y is number => y != null);
+    if (!years.length) return null;
+    const lo = Math.min(...years), hi = Math.max(...years);
+    return lo === hi ? `${lo}` : `${lo}–${hi}`;
+  }, [groups]);
+
   return (
     <Dialog
       open
@@ -89,6 +100,7 @@ export function EntityPanel({
           <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "JetBrains Mono, monospace" }}>
             {entity.type} · {total} record{total === 1 ? "" : "s"} across {groups.length} dataset
             {groups.length === 1 ? "" : "s"}
+            {span ? ` · ${span}` : ""}
           </Typography>
         </Box>
         <IconButton size="small" onClick={onClose} aria-label="Close">

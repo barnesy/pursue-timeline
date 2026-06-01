@@ -1167,6 +1167,8 @@ export function App() {
                 focusedHotspot={focusedHotspot}
                 onFocusChange={setFocusedHotspot}
                 onCollapse={() => hotspotsPanelRef.current?.collapse()}
+                entityIndex={entityIndex}
+                onEntity={setFocusedEntityId}
               />
             </Panel>
             <ResizeHandle />
@@ -1243,6 +1245,11 @@ export function App() {
                   setMobileDrawer(null);
                 }}
                 onCollapse={() => setMobileDrawer(null)}
+                entityIndex={entityIndex}
+                onEntity={(id) => {
+                  setFocusedEntityId(id);
+                  setMobileDrawer(null);
+                }}
               />
             </Drawer>
             <Drawer

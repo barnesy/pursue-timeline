@@ -5,16 +5,20 @@
 // case set). Click again to clear. Selection highlight + narrative expansion
 // mirror the previous in-map overlay behavior 1-for-1.
 
+import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import HubIcon from "@mui/icons-material/Hub";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import type { Case } from "./types";
 import { DATASETS, type DatasetId } from "./datasets";
 import { NOTABLE_HOTSPOTS, type NotableHotspot } from "./notableHotspots";
+import type { EntityIndex } from "./entities";
 
 type Props = {
   /** Full case set (un-focused) — so totals don't shrink when a hotspot is
@@ -24,9 +28,12 @@ type Props = {
   onFocusChange: (h: NotableHotspot | null) => void;
   /** When provided, the header renders a collapse button that calls this. */
   onCollapse?: () => void;
+  /** Cross-dataset entity registry — powers the "Top connectors" section. */
+  entityIndex?: EntityIndex;
+  onEntity?: (entityId: string) => void;
 };
 
-export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onCollapse }: Props) {
+export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onCollapse, entityIndex, onEntity }: Props) {
   // Per-hotspot stats: total matches + per-dataset breakdown.
   const stats = NOTABLE_HOTSPOTS.map((h) => {
     const matches = allCases.filter(h.matches);
@@ -40,6 +47,18 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
   const toggle = (h: NotableHotspot) => {
     onFocusChange(focusedHotspot?.id === h.id ? null : h);
   };
+
+  // Top network connectors — entities spanning the most datasets, then the
+  // most records. Cross-dataset reach is what makes a connector interesting.
+  const connectors = useMemo(() => {
+    if (!entityIndex) return [];
+    const dsOf = new Map(allCases.map((c) => [c.id, c.dataset]));
+    return [...entityIndex.byId.values()]
+      .map((e) => ({ e, datasets: new Set(e.caseIds.map((id) => dsOf.get(id))).size }))
+      .filter((x) => x.datasets >= 2)
+      .sort((a, b) => b.datasets - a.datasets || b.e.caseIds.length - a.e.caseIds.length)
+      .slice(0, 8);
+  }, [entityIndex, allCases]);
 
   return (
     <Box
@@ -102,6 +121,55 @@ export function HotspotsPanel({ allCases, focusedHotspot, onFocusChange, onColla
             />
           ))}
         </Stack>
+
+        {connectors.length > 0 && onEntity && (
+          <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.08)", mt: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                px: 2,
+                pt: 1.5,
+                pb: 0.5,
+                color: "text.secondary",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                fontSize: 10,
+              }}
+            >
+              Top connectors
+            </Typography>
+            <Stack sx={{ pb: 1 }}>
+              {connectors.map(({ e, datasets }) => {
+                const Icon = e.type === "place" ? PlaceOutlinedIcon : PersonOutlineIcon;
+                return (
+                  <Box
+                    key={e.id}
+                    onClick={() => onEntity(e.id)}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      px: 2,
+                      py: 0.6,
+                      cursor: "pointer",
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
+                    }}
+                  >
+                    <Icon sx={{ fontSize: 15, color: e.type === "place" ? "#7aa7d6" : "#9aa5b1", flexShrink: 0 }} />
+                    <Typography variant="body2" sx={{ flexGrow: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {e.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.disabled", fontFamily: "JetBrains Mono, monospace", flexShrink: 0 }}>
+                      {e.caseIds.length} · {datasets}ds
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
+        )}
       </Box>
     </Box>
   );
