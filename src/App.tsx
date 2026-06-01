@@ -44,6 +44,7 @@ import { useCaseIds } from "./collection";
 import { useUnits, unitsStore } from "./units";
 import { buildEntityIndex } from "./entities";
 import { EntityPanel } from "./EntityPanel";
+import { getLatLng } from "./proximity";
 import {
   DATASETS,
   DATASET_IDS,
@@ -408,9 +409,16 @@ export function App() {
       .then(([perDataset, people]) => {
         const data: Case[] = perDataset
           .flat()
-          .map((c) =>
-            c.dataset === "stargate" && people[c.id] ? { ...c, people: people[c.id] } : c,
-          );
+          .map((c) => {
+            const withPeople =
+              c.dataset === "stargate" && people[c.id] ? { ...c, people: people[c.id] } : c;
+            // Resolve string-only locations (UAP cases) to real coordinates once
+            // at load, so the places network/map/graph all see lat/lng instead
+            // of each re-running the geocoder (or, for places.ts, missing them).
+            if (typeof withPeople.lat === "number") return withPeople;
+            const ll = getLatLng(withPeople);
+            return ll ? { ...withPeople, lat: ll.lat, lng: ll.lng } : withPeople;
+          });
         setCases(data);
         setActiveAgencies(new Set(data.map((c) => c.agency).filter(Boolean)));
         setActiveTypes(new Set(data.map((c) => c.type).filter(Boolean)));

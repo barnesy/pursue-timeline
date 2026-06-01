@@ -40,6 +40,10 @@ export const PLACES: Place[] = [
   { id: "sandia-albuquerque", name: "Sandia / Albuquerque", lat: 35.05, lng: -106.5, radiusKm: 60, aliases: ["SANDIA", "ALBUQUERQUE", "KIRTLAND"] },
   { id: "los-alamos", name: "Los Alamos", lat: 35.88, lng: -106.3, radiusKm: 40, aliases: ["LOS ALAMOS", "LANL"] },
   { id: "roswell", name: "Roswell, NM", lat: 33.39, lng: -104.52, radiusKm: 60, aliases: ["ROSWELL"] },
+  // Region-scale: ties the theater-scale "New Mexico" UAP cases to the dense
+  // NM nuclear/physics cluster (Trinity, Sandia, Los Alamos) — the canonical
+  // cross-dataset UAP↔nuclear story. Broad radius by design.
+  { id: "new-mexico", name: "New Mexico (region)", lat: 34.5, lng: -106.0, radiusKm: 320, aliases: ["NEW MEXICO"] },
   // ── Nuclear incidents ───────────────────────────────────────────────
   { id: "hiroshima", name: "Hiroshima", lat: 34.39, lng: 132.45, radiusKm: 30, aliases: ["HIROSHIMA"] },
   { id: "nagasaki", name: "Nagasaki", lat: 32.77, lng: 129.87, radiusKm: 30, aliases: ["NAGASAKI"] },
